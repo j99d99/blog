@@ -1,0 +1,714 @@
+/* 清除所有浏览器默认的外边距和内边距 */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* 包括内边距和边框的宽度 */
+}
+
+/*#AACFD0*/
+/* 统一页面基础设置 */
+body {
+    margin: 0;
+    font-family: Consolas,Microsoft YaHei,Arial, sans-serif;
+    background-color: #F9F9F9; /* 浅灰色背景 */
+    color: #666; /* 主体文字颜色，深灰 */
+    font-size: 16px; /* 基准字体大小 */
+    line-height: 1.5; /* 行高设置为字体大小的 1.5倍 */
+}
+
+html,body {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 设置所有段落的默认间距和行高 */
+p {
+    margin: 0 0 1em 0; /* 段落之间的间距设置为1em（等于字体大小） */
+    line-height: 1.6; /* 行高设置为1.6 */
+}
+
+/* 标题的字体设置 */
+h1, h2, h3, h4, h5, h6 {
+    margin: 0 0 0.5em 0; /* 标题之间的下间距 */
+    font-weight: bold; /* 使标题加粗 */
+
+}
+
+/* 让h1, h2的字体大小适应不同的屏幕 */
+h1 {
+    font-size: 2rem; /* 32px，基于16px的基础字体大小 */
+    line-height: 1.4;
+}
+
+h2 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.4;
+}
+
+
+/* 设置基础按钮的样式 */
+button {
+    font-size: 1rem; /* 16px */
+    padding: 10px 20px; /* 内边距 */
+    margin: 5px; /* 外边距 */
+    background-color: #007BFF; /* 按钮背景色 */
+    color: #fff; /* 按钮文字颜色 */
+    border: none; /* 去除边框 */
+    border-radius: 4px; /* 边框圆角 */
+    cursor: pointer; /* 鼠标悬停时显示为指针 */
+}
+
+button:hover {
+    background-color: #0056b3; /* 按钮悬浮时的背景色 */
+}
+
+/* 清除表单元素的默认样式 */
+input, button, select, textarea {
+    border: none;
+    outline: none;
+    background: none;
+}
+
+/* 设置输入框和文本区域的基础样式 */
+input, textarea {
+    font-size: 1rem; /* 16px */
+    padding: 8px; /* 内边距 */
+    margin: 5px 0; /* 外边距 */
+    border: 1px solid #ccc; /* 边框 */
+    border-radius: 4px; /* 边框圆角 */
+    width: 100%; /* 填满父容器 */
+}
+
+
+/* 清除超链接的下划线 */
+a {
+    text-decoration: none;
+    color: inherit; /* 链接文本颜色继承父元素的颜色 */
+}
+
+/* 取消所有列表的默认样式 */
+ul, ol {
+    list-style: none;
+}
+
+
+
+/* 防止图片被拉伸 */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* end ----*/
+
+/* 部分公用样式 */
+.content{
+    /*background-color: #FFFFFF;*/
+    max-width: 100%;
+    flex: 3;
+}
+.sidebar {
+    /*background-color: #FFFFFF;*/
+    max-width: 100%;
+    flex: 1;
+}
+
+
+/* 内容区域基础样式*/
+.content ul {
+    margin: 20px;
+}
+.content li {
+    margin-bottom: 10px;
+}
+
+.content li:hover {
+    font-weight: bold;
+}
+
+.content-list {
+    flex-direction: column;
+    display: flex;
+}
+
+.content-list span {
+    display: inline-flex;
+    align-items: center;
+}
+
+/*内容区域文章标题前面图标*/
+.content-icon {
+    height: 1em;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+
+.img-icon {
+    height: 1em;
+    margin-right: 10px;
+}
+
+/*内容区域最近更新图标晃动效果*/
+.new-icon {
+  font-weight: bold;
+  color: #FFF;
+  background-color: #F89495;  /* 背景颜色 */
+  padding: 0 5px;  /* 内边距 */
+  border-radius: 5px;  /* 圆角效果 */
+  margin-right: 8px;  /* 文字与图标间距 */
+  font-size: 1rem;  /* 字体大小 */
+
+    /* 添加动画效果 */
+  display: inline-block; /* 保证元素本身不会影响页面布局 */
+  animation: shake 1s ease-in-out infinite; /* 调用摇晃动画，持续时间0.5s，循环执行 */
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg); /* 初始角度 */
+  }
+  25% {
+    transform: rotate(-10deg); /* 左晃 */
+  }
+  50% {
+    transform: rotate(10deg); /* 右晃 */
+  }
+  75% {
+    transform: rotate(-10deg); /* 左晃 */
+  }
+  100% {
+    transform: rotate(0deg); /* 回到原位置 */
+  }
+}
+
+/* 页脚自定义样式 */
+footer {
+    background-color: #FFFFFF;
+    text-align: center;
+    padding: 5px 0;
+    color: #888888; /* 页脚文字灰色 */
+    border-top: 1px solid #DDDDDD; /* 页脚上边框 */
+}
+
+footer a {
+    color: #0066CC; /* 页脚链接的蓝色 */
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+footer p {
+    margin: 0;
+}
+
+
+
+/*@import url('base.css');*/
+/* web自定义样式 */
+
+/* 导航栏样式 */
+.navbar {
+    background-color: #FFFFFF; /* 白色背景 */
+    border-bottom: 1px solid #DDDDDD; /* 灰色边框 */
+    height: 60px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 添加阴影效果 */
+    padding: 10px 0;
+    display: flex;
+}
+
+.menu {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-title {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.nav-menu {
+
+    list-style: none;
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    padding: 0;
+    height: 100%;
+}
+
+.nav-menu > li {
+    margin: 0 15px;
+    position: relative;
+}
+
+.nav-menu >li > a {
+    /* color: #333333;  链接文字颜色 */
+    display: block;
+}
+
+/*.nav-menu a:hover {*/
+/*    font-weight: bold;*/
+/*}*/
+/* 鼠标悬停一级菜单时的悬停效果，两者结合表示除文本外的区域时也有悬停效果 */
+.nav-menu > li > a:hover,
+.nav-menu > li:hover > a {
+    /* background-color:aqua;  /* 悬停时颜色 */
+    font-weight: bold;
+}
+
+
+/* 二级菜单样式 */
+.submenu {
+    display: none;
+    position: absolute;
+    background-color: #F9F9F9;
+    list-style: none;
+    margin: 0;
+    padding: 10px 0 0;
+    min-width: 80px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+.submenu > li > a {
+    /*color: #FFF;*/
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    white-space: nowrap;
+}
+/* 二级菜单悬停时颜色设置 */
+.submenu > li > a:hover {
+    background-color:#F9F9F9;
+    /*color:#666;*/
+    font-weight: bold;
+}
+.nav-menu > li:hover .submenu {
+    display: block;
+}
+
+/* base.html 导航与内容悬浮间距 ，值为导航高度*/
+#app {
+    margin-top: 60px; /* 防止被固定的导航栏遮挡 */
+    flex: 1;
+}
+
+
+/* 内容区域布局样式，内容和侧边栏 */
+.main {
+    /*background-color: #FFFFFF;*/
+    padding: 60px 0;
+    /*box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);*/
+    display: flex;
+    gap: 20px;
+    max-width: 940px;
+    /*flex-grow: 1;*/
+}
+/*@import url('index.css');*/
+/* Banner自定义样式 */
+.banner {
+    /* background-color: #FFFFFF; 背景白色 */
+    padding: 20px;
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 阴影效果 */
+    height: 240px;
+}
+.banner-content {
+    text-align: center;
+}
+
+/* banner照片墙样式开始 */
+.photo-wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* 照片之间的间距 */
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.photo-item {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border: 5px solid #fff;
+    border-radius: 8px;
+    background-color: #fff;
+    /*font-weight: bold;  文字加粗 */
+    color: #000; /* 文字颜色 */
+
+    /* 让每张照片稍微旋转，随机倾斜角度 */
+    transform: rotate(calc(var(--rotate-angle) * 1deg));
+    transition: transform 0.2s ease;
+}
+
+/* 随机生成旋转角度 */
+.photo-item:nth-child(odd) {
+    --rotate-angle: 3;
+    margin-top: 10px;
+}
+
+.photo-item:nth-child(even) {
+    --rotate-angle: -3;
+    margin-bottom: 10px;
+}
+
+.photo-item:hover {
+    transform: scale(1.1) rotate(0deg); /* 悬停时放大且正位 */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* 确保文字居中且适应 */
+.photo-text {
+    font-size: 3vw; /* 字体大小相对于容器的宽度 */
+    text-align: center; /* 文字水平居中 */
+    line-height: 1; /* 去除多余的行高 */
+    white-space: nowrap; /* 防止文字换行 */
+    background: linear-gradient(45deg, #ff6b6b, #f8a5a5); /* 渐变颜色 */
+    -webkit-background-clip: text; /* 文字应用背景剪裁 */
+    color: transparent; /* 保证文字的颜色为透明，使用背景渐变来填充 */
+}
+/* 照片墙样式结尾 */
+
+/* 侧边栏基础样式 */
+.sidebar {
+    /*padding: 20px;  内边距 */
+    /*box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  阴影效果 */
+    border-radius: 8px; /* 边角圆润 */
+    position: sticky;
+    top: 20px; /* 让侧边栏随着页面滚动固定在顶部 */
+    /*background-color: #F9F9F9;*/
+}
+
+.sidebar-section {
+    margin-bottom: 20px; /* 各个模块之间的间距 */
+    /*background-color: #FFF;*/
+}
+
+.sidebar-section h3 {
+    font-weight: bold;
+    /*color: #6E7173;*/
+    margin-bottom: 15px; /* 标题与内容之间的间距 */
+    border-bottom: 1px solid #ddd; /* 标题下方的分隔线 */
+    padding-bottom: 5px;
+}
+
+.author-info {
+    text-align: center;
+}
+
+.author-avatar {
+    /*width: 80px;*/
+    /*height: 80px;*/
+    /*border-radius: 50%;*/
+    width: 100%;
+    height: 100%;
+    margin-bottom: 10px;
+}
+
+.author-info p {
+    /*color: #666;*/
+    line-height: 1.5;
+}
+
+/* 侧边栏sidebar里面的热门标签 */
+.tag-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;       /* 子元素超出容器宽度时换行 */
+    gap: 10px;             /* 可选：设置子元素之间的间距 */
+    list-style: none;
+    padding: 0;
+}
+
+.tag-list li {
+    margin-bottom: 10px;
+}
+
+.tag-list a {
+    text-decoration: none;
+    /*color: #666;*/
+    transition: color 0.3s ease;
+
+    /* 设置基础按钮的样式 */
+    font-size: 1rem; /* 16px */
+    padding: 5px 10px; /* 内边距 */
+    margin: 5px; /* 外边距 */
+    /*background-color: #007BFF;  按钮背景色 */
+    color: #F89495;
+    border: 1px solid #F89495; /* 去除边框 */
+    border-radius: 4px; /* 边框圆角 */
+    cursor: pointer; /* 鼠标悬停时显示为指针 */
+}
+
+.tag-list a:hover {
+    color: #F76D8A; /* 按钮文字颜色 */
+    border: 1px solid #F76D8A; /* 去除边框 */
+    font-weight: bold;
+}
+
+/* 侧边栏sidebar里面的推荐文章 */
+.recommended-list {
+    list-style: none;
+    padding: 0;
+}
+
+.recommended-list li {
+    margin-bottom: 10px;
+}
+
+.recommended-list a {
+    text-decoration: none;
+    /*color: #333;*/
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.recommended-list a:hover {
+    color: #007BFF;
+}
+
+/*@import url('article.css');*/
+/*文章页单独样式*/
+.article-content {
+    border-bottom: 1px dashed black;
+}
+.article-content h3 {
+    text-align: center;
+
+}
+/*代码块样式*/
+pre {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    overflow-x: auto; /* 使代码块可水平滚动 */
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+}
+
+pre code {
+    display: block;
+    white-space: pre-wrap; /* 使长代码行能够自动换行 */
+    word-wrap: break-word; /* 使长代码行能够自动换行 */
+}
+/*@import url('search.css');*/
+/* 搜索页自定义样式*/
+.search-box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
+/* 搜索容器 */
+#search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 50px auto;
+    position: relative; /* 为了放置图片 */
+    width: 600px;
+}
+
+#search-container input {
+    /*width: 400px;*/
+    height: 40px;
+    padding-left: 40px; /* 给搜索图标留出空间 */
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+/* PNG 搜索图标 */
+#search-container img.search-icon {
+    position: absolute;
+    left: 12px;
+    width: 20px;  /* 图标宽度 */
+    height: 20px; /* 图标高度 */
+}
+
+#search-container input:focus {
+    border-color: #F89495;
+    box-shadow: 0 0 5px rgba(247, 109, 138, 0.5);
+
+}
+
+/* 搜索结果区域 */
+#search-results {
+    /*max-width: 800px;*/
+    margin: 0 auto;
+    padding-top: 30px;
+    width: 100%;
+}
+
+.query-color {
+    color: #F89495;
+}
+.result-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.result-title {
+    /*font-size: 16px;*/
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.result-title img {
+    /* 使图片与链接高度一致 */
+    height: 1em;
+    margin-right: 10px;
+    /*vertical-align: middle;   确保图片和文字垂直居中 */
+}
+
+.result-title a {
+    display: inline-block;
+    /*vertical-align: middle;*/
+    line-height: 1;  /* 去掉默认的行高，避免与图片产生间距 */
+}
+
+.result-description {
+    display: none;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 无结果时的提示 */
+#search-results p {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+}
+/*@import url('tag_categories.css');*/
+/* categories.html页和tags.html页分类列表样式*/
+.category-list {
+    max-width: 960px;
+    width: 100%;
+}
+
+.category-list ul {
+    display: flex;
+    /*flex-direction: row;*/
+    flex-wrap: wrap;
+}
+
+.category-list li {
+  flex: 0 0 calc(25% - 10px); /* 每个li占容器宽度的25%（即4个一行），减去间距 */
+  margin: 10px 5px;               /* 设置每个li之间的间距 */
+  box-sizing: border-box;    /* 确保宽度包括padding和border */
+  background-color: #fff; /* 可选：设置背景颜色 */
+  padding: 20px;             /* 可选：为每个li元素添加内边距 */
+  text-align: center;        /* 可选：居中显示内容 */
+  border: 1px solid #fff;    /* 可选：设置边框 */
+}
+
+.category-list li:hover {
+    background-color: #EBF0F7;
+    border: 1px solid #EBF0F7;    /* 可选：设置边框 */
+  /*box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);*/
+}
+.tag-container {
+    padding-bottom: 0.5em;
+
+    /*margin-bottom: 1em;*/
+}
+.tag-container span {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 60px;
+}
+
+/*@import url('webnav.css');*/
+/*web导航页自定义样式*/
+/* 样式设置 */
+.nav-level {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+}
+.nav-container {
+    display: flex;
+    flex-wrap: wrap;
+    /*gap: 10px;*/
+    justify-content: start;
+
+    width: 100%;
+}
+
+.nav-box {
+    flex: 0 0 calc(25% - 10px);
+  display: flex;
+  justify-content: center;
+  /*padding: 10px;*/
+  background-color: #fff;
+    /*box-sizing: border-box;*/
+    margin: 10px 5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: start; /* 使logo和文本垂直对齐 */
+  text-decoration: none;
+  color: #000;
+  padding: 10px;
+  border: 1px solid #FFF;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+    width: 100%;
+}
+
+.nav-box:hover {
+  background-color: #EBF0F7;
+}
+
+.nav-logo {
+  width: auto; /* 保持宽高比 */
+  height: 24px; /* 根据需要调整logo的高度 */
+  margin-right: 8px; /* logo和文本之间的间距 */
+}
+
+.nav-name {
+  /* font-size: 16px;     导航名称的字体大小 */
+  font-weight: 700;
+}
+.nav-description {
+    font-size: 0.8em;
+}
+
+

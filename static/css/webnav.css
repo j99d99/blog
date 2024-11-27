@@ -1,0 +1,56 @@
+/*web导航页自定义样式*/
+/* 样式设置 */
+.nav-level {
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+}
+.nav-container {
+    display: flex;
+    flex-wrap: wrap;
+    /*gap: 10px;*/
+    justify-content: start;
+
+    width: 100%;
+}
+
+.nav-box {
+    flex: 0 0 calc(25% - 10px);
+  display: flex;
+  justify-content: center;
+  /*padding: 10px;*/
+  background-color: #fff;
+    /*box-sizing: border-box;*/
+    margin: 10px 5px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: start; /* 使logo和文本垂直对齐 */
+  text-decoration: none;
+  color: #000;
+  padding: 10px;
+  border: 1px solid #FFF;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+    width: 100%;
+}
+
+.nav-box:hover {
+  background-color: #EBF0F7;
+}
+
+.nav-logo {
+  width: auto; /* 保持宽高比 */
+  height: 24px; /* 根据需要调整logo的高度 */
+  margin-right: 8px; /* logo和文本之间的间距 */
+}
+
+.nav-name {
+  /* font-size: 16px;     导航名称的字体大小 */
+  font-weight: 700;
+}
+.nav-description {
+    font-size: 0.8em;
+}

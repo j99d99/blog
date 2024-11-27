@@ -1,0 +1,101 @@
+/* 搜索页自定义样式*/
+.search-box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+
+/* 搜索容器 */
+#search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 50px auto;
+    position: relative; /* 为了放置图片 */
+    width: 600px;
+}
+
+#search-container input {
+    /*width: 400px;*/
+    height: 40px;
+    padding-left: 40px; /* 给搜索图标留出空间 */
+    border-radius: 25px;
+    border: 1px solid #ddd;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+    transition: all 0.3s ease;
+}
+
+/* PNG 搜索图标 */
+#search-container img.search-icon {
+    position: absolute;
+    left: 12px;
+    width: 20px;  /* 图标宽度 */
+    height: 20px; /* 图标高度 */
+}
+
+#search-container input:focus {
+    border-color: #F89495;
+    box-shadow: 0 0 5px rgba(247, 109, 138, 0.5);
+
+}
+
+/* 搜索结果区域 */
+#search-results {
+    /*max-width: 800px;*/
+    margin: 0 auto;
+    padding-top: 30px;
+    width: 100%;
+}
+
+.query-color {
+    color: #F89495;
+}
+.result-item {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.result-title {
+    /*font-size: 16px;*/
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.result-title img {
+    /* 使图片与链接高度一致 */
+    height: 1em;
+    margin-right: 10px;
+    /*vertical-align: middle;   确保图片和文字垂直居中 */
+}
+
+.result-title a {
+    display: inline-block;
+    /*vertical-align: middle;*/
+    line-height: 1;  /* 去掉默认的行高，避免与图片产生间距 */
+}
+
+.result-description {
+    display: none;
+    font-size: 14px;
+    color: #666;
+}
+
+/* 无结果时的提示 */
+#search-results p {
+    text-align: center;
+    color: #888;
+    font-size: 16px;
+}

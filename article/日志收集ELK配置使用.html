@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日志收集ELK配置使用</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>日志收集ELK配置使用</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>elk</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <h2>软件下载</h2>
+<p>2.3版本官网下载链接以及具体的下载地址</p>
+<pre class="codehilite"><code class="language-bash">wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.17.6-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-7.17.6-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/kibana/kibana-7.17.6-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/logstash/logstash-7.17.6-linux-x86_64.tar.gz
+</code></pre>
+
+<h2>elasticsearch安装</h2>
+<!--more-->
+<ul>
+<li>1.安装 </li>
+</ul>
+<pre class="codehilite"><code class="language-bash">tar -zxvf elasticsearch-7.17.6-linux-x86_64.tar.gz  -C /data/
+cd /data/elasticsearch-7.17.6
+
+useradd -M efk -s /bin/false 
+
+# 限制一个进程可以拥有的VMA(虚拟内存区域)的数量要超过262144，不然elasticsearch会报max virtual memory areas vm.max_map_count [65535] is too low, increase to at least [262144]
+echo &quot;vm.max_map_count = 655350&quot; &gt;&gt; /etc/sysctl.conf
+sysctl -p
+
+解普通用户打开文件句柄的限制
+vi /etc/security/limits.conf
+* soft nofile 65536
+* hard nofile 65536
+* soft nproc 65536
+* hard nproc 65536
+</code></pre>
+
+<ul>
+<li>
+<ol>
+<li>配置config/elasticsearch.yml
+创建日志和数据目录</li>
+</ol>
+</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">mkdir -p /data/efk/elasticsearch
+mkdir -p /data/logs/efk
+chown -R efk. /data/efk/elasticsearch
+chown -R efk. /data/logs/
+</code></pre>
+
+<p>各节点配置</p>
+<p><strong>172.16.90.210</strong></p>
+<pre class="codehilite"><code class="language-bash"># 集群名字
+cluster.name: my-application
+
+# 节点名字
+node.name: 172.16.90.210
+
+# 日志位置
+path.logs: /data/logs/elasticsearch
+
+# 数据位置
+path.data: /data/efk/elasticsearch
+
+# 本节点访问IP
+network.host: 172.16.90.210
+
+# 本节点访问
+http.port: 9200
+
+# 节点运输端口
+transport.port: 9300
+
+# 集群中其他主机的列表
+discovery.seed_hosts: [&quot;172.16.90.210&quot;, &quot;172.16.90.211&quot;, &quot;172.16.90.212&quot;]
+
+# 首次启动全新的Elasticsearch集群时，在第一次选举中便对其票数进行计数的master节点的集合
+cluster.initial_master_nodes: [&quot;172.16.90.210&quot;, &quot;172.16.90.211&quot;, &quot;172.16.90.212&quot;]
+
+xpack.security.enabled: false
+#xpack.security.transport.ssl.enabled: true
+
+# 启用跨域资源共享
+#http.cors.enabled: true
+#http.cors.allow-origin: &quot;*&quot;
+</code></pre>
+
+<p><strong>172.16.90.211</strong></p>
+<pre class="codehilite"><code class="language-bash"># 集群名字
+cluster.name: my-application
+
+# 节点名字
+node.name: 172.16.90.211
+
+# 日志位置
+path.logs: /data/logs/elasticsearch
+
+# 数据位置
+path.data: /data/efk/elasticsearch
+
+# 本节点访问IP
+network.host: 172.16.90.211
+
+# 本节点访问
+http.port: 9200
+
+# 节点运输端口
+transport.port: 9300
+
+# 集群中其他主机的列表
+discovery.seed_hosts: [&quot;172.16.90.210&quot;, &quot;172.16.90.211&quot;, &quot;172.16.90.212&quot;]
+
+# 首次启动全新的Elasticsearch集群时，在第一次选举中便对其票数进行计数的master节点的集合
+cluster.initial_master_nodes: [&quot;172.16.90.210&quot;, &quot;172.16.90.211&quot;, &quot;172.16.90.212&quot;]
+
+xpack.security.enabled: false
+#xpack.security.transport.ssl.enabled: true
+
+# 启用跨域资源共享
+#http.cors.enabled: true
+#http.cors.allow-origin: &quot;*&quot;
+</code></pre>
+
+<p><strong>172.16.90.212</strong></p>
+<pre class="codehilite"><code class="language-bash"># 集群名字
+cluster.name: my-application
+
+# 节点名字
+node.name: 172.16.90.212
+
+# 日志位置
+path.logs: /data/logs/elasticsearch
+
+# 数据位置
+path.data: /data/efk/elasticsearch
+
+# 本节点访问IP
+network.host: 172.16.90.212
+
+# 本节点访问
+http.port: 9200
+
+# 节点运输端口
+transport.port: 9300
+
+# 集群中其他主机的列表
+discovery.seed_hosts: [&quot;172.16.90.210&quot;, &quot;172.16.90.211&quot;, &quot;172.16.90.212&quot;]
+
+# 首次启动全新的Elasticsearch集群时，在第一次选举中便对其票数进行计数的master节点的集合
+cluster.initial_master_nodes: [&quot;172.16.90.210&quot;, &quot;172.16.90.211&quot;, &quot;172.16.90.212&quot;]
+
+xpack.security.enabled: false
+#xpack.security.transport.ssl.enabled: true
+
+# 启用跨域资源共享,安装head插件时必须开启此参数
+http.cors.enabled: true
+http.cors.allow-origin: &quot;*&quot;
+</code></pre>
+
+<ul>
+<li>2.启动elasticsearch</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">sudo -u efk /data/elasticsearch-7.17.6/bin/elasticsearch &amp;   #使用www身份启动
+</code></pre>
+
+<ul>
+<li>
+<ol>
+<li>插件安装</li>
+</ol>
+</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">#需要安装node环境
+curl -fsSL https://rpm.nodesource.com/setup_lts.x | bash -
+yum install -y nodejs
+
+
+
+#安装head插件,elasticsearch-head放置在任意目录。不要放在elasticsearch的plugin或module目录下
+https://github.com/mobz/elasticsearch-head
+git clone https://github.com/mobz/elasticsearch-head.git
+npm install -g grunt-cli
+npm install
+grunt server
+
+#访问
+http://172.16.90.210:9100/
+
+
+#npm install过程中如果有报错phantomjs不存在，则执行，
+cd /usr/local/share
+wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2
+ tar xjf phantomjs-2.1.1-linux-x86_64.tar.bz2
+ln -s /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/share/phantomjs
+ln -s /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs
+ln -s /usr/local/share/phantomjs-2.1.1-linux-x86_64/bin/phantomjs /usr/bin/phantomjs
+</code></pre>
+
+<ul>
+<li>4.访问测试</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">http://172.16.90.210:9200
+http://172.16.90.210:9200/_plugiin/head
+</code></pre>
+
+<h2>kibana安装</h2>
+<ul>
+<li>
+<ol>
+<li>安装</li>
+</ol>
+</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">tar -zxvf kibana-7.17.6-linux-x86_64.tar.gz -C /data/
+chown -R efk:efk /data/kibana-7.17.6/
+</code></pre>
+
+<ul>
+<li>2.配置config/kibana.yaml</li>
+</ul>
+<pre class="codehilite"><code class="language-bash"># 本节点访问端口
+server.port: 5601
+
+# 本节点IP
+server.host: &quot;172.16.90.210&quot;
+
+# 本节点名字
+server.name: &quot;172.16.90.210&quot;
+
+# elasticsearch集群IP
+elasticsearch.hosts: [&quot;http://172.16.90.210:9200&quot;,
+                      &quot;http://172.16.90.211:9200&quot;,
+                      &quot;http://172.16.90.212:9200&quot;]
+</code></pre>
+
+<ul>
+<li>
+<ol>
+<li>启动kibana</li>
+</ol>
+</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">sudo -u efk /data/kibana-7.17.6-linux-x86_64/bin/kibana &amp; &amp;
+</code></pre>
+
+<h2>安装filebeat</h2>
+<h3>filebeat安装在需要被收集日志的服务器上</h3>
+<ul>
+<li>
+<ol>
+<li>安装</li>
+</ol>
+</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">tar -zxvf filebeat-7.17.6-linux-x86_64.tar.gz -C /data/filebeat-7.17.6
+</code></pre>
+
+<ul>
+<li>
+<ol>
+<li>配置filebeat.yml</li>
+</ol>
+</li>
+</ul>
+<pre class="codehilite"><code class="language-bash"># 文件输入
+filebeat.inputs:
+  # 文件输入类型
+  - type: log
+    # 开启加载
+    enabled: true
+    # 文件位置
+    paths:
+      - /var/log/nginx/access.log
+    # 自定义参数
+    fields:
+      type: nginx_access  # 类型是nginx_access,和上面fields.type是一致的
+# 输出类型有Elasticsearch，Logstash，Kafka，Redis，File，Console，ElasticCloud，Changetheoutputcodec（最常用的就是Elasticsearch，Logstash）
+# 输出至elasticsearch
+output.elasticsearch:
+  # elasticsearch集群
+  hosts: [&quot;http://172.16.90.210:9200&quot;,
+          &quot;http://172.16.90.211:9200&quot;,
+          &quot;http://172.16.90.212:9200&quot;]
+
+  # 索引配置
+  indices:
+    # 索引名
+    - index: &quot;nginx_access_%{+yyy.MM}&quot;
+      # 当类型是nginx_access时使用此索引
+      when.equals:
+        fields.type: &quot;nginx_access&quot;
+
+# 关闭自带模板
+setup.template.enabled: false
+
+# 开启日志记录
+logging.to_files: true
+# 日志等级
+logging.level: info
+# 日志文件
+logging.files:
+  # 日志位置
+  path: /opt/logs/filebeat/
+  # 日志名字
+  name: filebeat
+  # 日志轮转期限，必须要2~1024
+  keepfiles: 7
+  # 日志轮转权限
+  permissions: 0600
+</code></pre>
+
+<pre class="codehilite"><code class="language-bash">type: log #input类型为log,支持的类型有Multilinemessages，Azureeventhub，CloudFoundry，Container，Docker，GooglePub/Sub，HTTPJSON，Kafka，Log，MQTT，NetFlow，Office 365 Management Activity API，Redis，s3，Stdin，Syslog，TCP，UDP（最常用的就是Log）
+enable: true #表示是该log类型配置生效
+paths：     #指定要监控的日志，目前按照Go语言的glob函数处理。没有对配置目录做递归处理，比如配置的如果是：
+- /var/log/* /*.log  #则只会去/var/log目录的所有子目录中寻找以&quot;.log&quot;结尾的文件，而不会寻找/var/log目录下以&quot;.log&quot;结尾的文件。
+recursive_glob.enabled: #启用全局递归模式，例如/foo/**包括/foo, /foo/*, /foo/*/*
+encoding：#指定被监控的文件的编码类型，使用plain和utf-8都是可以处理中文日志的
+exclude_lines: ['^DBG'] #不包含匹配正则的行
+include_lines: ['^ERR', '^WARN']  #包含匹配正则的行
+harvester_buffer_size: 16384 #每个harvester在获取文件时使用的缓冲区的字节大小
+max_bytes: 10485760 #单个日志消息可以拥有的最大字节数。max_bytes之后的所有字节都被丢弃而不发送。默认值为10MB (10485760)
+exclude_files: ['.gz$']  #用于匹配希望Filebeat忽略的文件的正则表达式列表
+ingore_older: 0 #默认为0，表示禁用，可以配置2h，2m等，注意ignore_older必须大于close_inactive的值.表示忽略超过设置值未更新的
+文件或者文件从来没有被harvester收集
+close_* #close_ *配置选项用于在特定标准或时间之后关闭harvester。 关闭harvester意味着关闭文件处理程序。 如果在harvester关闭
+后文件被更新，则在scan_frequency过后，文件将被重新拾取。 但是，如果在harvester关闭时移动或删除文件，Filebeat将无法再次接收文件
+，并且harvester未读取的任何数据都将丢失。
+close_inactive  #启动选项时，如果在制定时间没有被读取，将关闭文件句柄
+读取的最后一条日志定义为下一次读取的起始点，而不是基于文件的修改时间
+如果关闭的文件发生变化，一个新的harverster将在scan_frequency运行后被启动
+建议至少设置一个大于读取日志频率的值，配置多个prospector来实现针对不同更新速度的日志文件
+使用内部时间戳机制，来反映记录日志的读取，每次读取到最后一行日志时开始倒计时使用2h 5m 来表示
+close_rename #当选项启动，如果文件被重命名和移动，filebeat关闭文件的处理读取
+close_removed #当选项启动，文件被删除时，filebeat关闭文件的处理读取这个选项启动后，必须启动clean_removed
+close_eof #适合只写一次日志的文件，然后filebeat关闭文件的处理读取
+close_timeout #当选项启动时，filebeat会给每个harvester设置预定义时间，不管这个文件是否被读取，达到设定时间后，将被关闭
+close_timeout 不能等于ignore_older,会导致文件更新时，不会被读取如果output一直没有输出日志事件，这个timeout是不会被启动的，
+至少要要有一个事件发送，然后haverter将被关闭
+设置0 表示不启动
+clean_inactived #从注册表文件中删除先前收获的文件的状态
+设置必须大于ignore_older+scan_frequency，以确保在文件仍在收集时没有删除任何状态
+配置选项有助于减小注册表文件的大小，特别是如果每天都生成大量的新文件
+此配置选项也可用于防止在Linux上重用inode的Filebeat问题
+clean_removed #启动选项后，如果文件在磁盘上找不到，将从注册表中清除filebeat
+如果关闭close removed 必须关闭clean removed
+scan_frequency #prospector检查指定用于收获的路径中的新文件的频率,默认10s
+tail_files：#如果设置为true，Filebeat从文件尾开始监控文件新增内容，把新增的每一行文件作为一个事件依次发送，
+而不是从文件开始处重新发送所有内容。
+symlinks：#符号链接选项允许Filebeat除常规文件外,可以收集符号链接。收集符号链接时，即使报告了符号链接的路径，
+Filebeat也会打开并读取原始文件。
+backoff： #backoff选项指定Filebeat如何积极地抓取新文件进行更新。默认1s，backoff选项定义Filebeat在达到EOF之后
+再次检查文件之间等待的时间。
+max_backoff： #在达到EOF之后再次检查文件之前Filebeat等待的最长时间
+backoff_factor： #指定backoff尝试等待时间几次，默认是2
+harvester_limit：#harvester_limit选项限制一个prospector并行启动的harvester数量，直接影响文件打开数
+tags #列表中添加标签，用过过滤，例如：tags: [&quot;json&quot;]
+fields #可选字段，选择额外的字段进行输出可以是标量值，元组，字典等嵌套类型
+默认在sub-dictionary位置
+filebeat.inputs:
+fields:
+app_id: query_engine_12
+fields_under_root #如果值为ture，那么fields存储在输出文档的顶级位置
+multiline.pattern #必须匹配的regexp模式
+multiline.negate #定义上面的模式匹配条件的动作是 否定的，默认是false
+假如模式匹配条件'^b'，默认是false模式，表示讲按照模式匹配进行匹配 将不是以b开头的日志行进行合并
+如果是true，表示将不以b开头的日志行进行合并
+multiline.match # 指定Filebeat如何将匹配行组合成事件,在之前或者之后，取决于上面所指定的negate
+multiline.max_lines #可以组合成一个事件的最大行数，超过将丢弃，默认500
+multiline.timeout #定义超时时间，如果开始一个新的事件在超时时间内没有发现匹配，也将发送日志，默认是5s
+max_procs #设置可以同时执行的最大CPU数。默认值为系统中可用的逻辑CPU的数量。
+name #为该filebeat指定名字，默认为主机的hostname
+</code></pre>
+
+<h2>安装logstash</h2>
+<pre class="codehilite"><code class="language-bash">tar zxf logstash-1.5.6.tar.gz -C /usr/local/
+#patterns目录里存放匹配的配置文件，pattern文件具体位置
+cd /usr/local/logstash-1.5.6/vendor/bundle/jruby/1.9/gems/logstash-patterns-core-2.0.5/patterns/
+</code></pre>
+
+<h2>logstash搜集tomcat日志</h2>
+<p>参考logstash搜集tomcat日志配置样例:</p>
+<pre class="codehilite"><code class="language-bash">#收集tomcat日志
+input {
+    file {
+        codec =&gt; multiline {
+                         pattern =&gt; &quot;^\\s&quot;
+                         what =&gt; &quot;previous&quot;
+                }
+        path =&gt; &quot;/data/weblogs/tomcat_test/tomcat01-service-test.log&quot;
+                start_position =&gt; &quot;beginning&quot;
+    }
+}
+filter {
+  grok {
+        patterns_dir =&gt; &quot;/usr/local/logstash-1.5.6/vendor/bundle/jruby/1.9/gems/logstash-patterns-core-0.4.0/patterns/&quot;
+        match =&gt; {
+            &quot;message&quot; =&gt; &quot;%{TOMCATLOG}&quot;
+        }
+        add\_field =&gt; \[ &quot;server\_ip&quot;, &quot;10.168.xx.xxx&quot; \]
+  }
+}
+output {
+    elasticsearch {
+        host =&gt; '121.40.xx.xx'    #elasticsearch服务端的iP 
+        index =&gt; 'tomcat01-%{+YYYY.MM.dd}'#如果多台服务器使用同一索引的话，每台服务器填写一样的名字，按时间建立索引%{+YYYY.MM.dd}
+        bind_host =&gt; '121.40.yy.yy'#当双网卡时,可通过此参数指定绑定本机ip
+    }
+}
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

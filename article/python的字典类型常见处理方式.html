@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>python的字典类型常见处理方式</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>python的字典类型常见处理方式</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>python</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p>在Python中，字典（dictionary）类型是一种常见且重要的数据结构，它提供了键-值对的存储方式。以下是一些常见的字典处理方式：</p>
+<ol>
+<li>访问字典元素：使用键（key）访问字典中的值（value）。</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+print(my_dict[&quot;name&quot;])  # 输出：&quot;Alice&quot;
+print(my_dict[&quot;age&quot;])   # 输出：25
+</code></pre>
+
+<ol>
+<li>添加或修改字典元素：通过键来添加或修改字典中的元素。</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+my_dict[&quot;occupation&quot;] = &quot;Engineer&quot;    # 添加新的键值对
+my_dict[&quot;age&quot;] = 26                   # 修改现有键的值
+print(my_dict)                        # 输出：{&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 26, &quot;city&quot;: &quot;New York&quot;, &quot;occupation&quot;: &quot;Engineer&quot;}
+</code></pre>
+
+<ol>
+<li>删除字典元素：使用<code>del</code>语句删除指定的键值对。</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+del my_dict[&quot;age&quot;]
+print(my_dict)  # 输出：{&quot;name&quot;: &quot;Alice&quot;, &quot;city&quot;: &quot;New York&quot;}
+</code></pre>
+
+<ol>
+<li>遍历字典：使用循环结构遍历字典的键或值。</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+# 遍历键(keys)
+for key in my_dict:
+    print(key)
+# 遍历值(values)
+for value in my_dict.values():
+    print(value)
+# 遍历键值对(items)
+for key, value in my_dict.items():
+    print(key, value)
+#使用enumerate()函数
+my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+for index, key in enumerate(my_dict):
+    value = my_dict[key]
+    print(index, key, value)
+#使用字典解析
+my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+new_dict = {key: value for key, value in my_dict.items()}
+print(new_dict)
+</code></pre>
+
+<ol>
+<li>获取字典长度：使用<code>len()</code>函数获取字典中键值对的数量。</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+length = len(my_dict)
+print(length)  # 输出：3
+</code></pre>
+
+<ol>
+<li>检查键是否存在：使用<code>in</code>关键字检查某个键是否存在于字典中。</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+if &quot;name&quot; in my_dict:
+    print(&quot;Name exists in the dictionary.&quot;)
+</code></pre>
+
+<ol>
+<li>获取字典的键列表、值列表或键值对列表：</li>
+</ol>
+<pre class="codehilite"><code class="language-python">my_dict = {&quot;name&quot;: &quot;Alice&quot;, &quot;age&quot;: 25, &quot;city&quot;: &quot;New York&quot;}
+keys = list(my_dict.keys())         # 获取键列表
+values = list(my_dict.values())     # 获取值列表
+items = list(my_dict.items())       # 获取键值对列表
+print(keys)
+print(values)
+print(items)
+</code></pre>
+
+<p>这些是常见的字典处理方式，可以根据具体的需求和场景选择适合的方法来操作和处理字典。字典提供了灵活且强大的功能，可以用于各种数据存储和处理的任务。</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

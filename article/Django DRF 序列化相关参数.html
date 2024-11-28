@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django DRF 序列化相关参数</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>Django DRF 序列化相关参数</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>python</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p>Django Rest Framework的ModelSerializer是一个方便的工具，可以帮助我们快速地创建RESTful API。以下是ModelSerializer的各个参数和方法以及参数验证的详细解释：</p>
+<ol>
+<li>
+<p>ModelSerializer参数：</p>
+</li>
+<li>
+<p>model：必需参数，指定序列化的模型。</p>
+</li>
+<li>fields：序列化器要序列化的字段。可以是一个字符串列表，也可以是'<strong>all</strong>'，表示所有字段。</li>
+<li>exclude：序列化器不序列化的字段。可以是一个字符串列表。</li>
+<li>read_only_fields：只读字段。只在序列化输出时使用，不在反序列化输入时使用。可以是一个字符串列表。</li>
+<li>write_only_fields：只写字段。只在反序列化输入时使用，不在序列化输出时使用。可以是一个字符串列表。</li>
+<li>validators：用于验证输入的序列化器的全局验证器。应该是一个列表或元组，其中每个元素是一个验证函数。</li>
+<li>extra_kwargs：为模型字段指定额外的关键字参数，比如设置默认值或最大长度。</li>
+<li>
+<p>depth：控制嵌套关系的深度。如果需要嵌套多层关系，可以设置depth的值来控制嵌套的层数。</p>
+</li>
+<li>
+<p>create()和update()方法：</p>
+</li>
+</ol>
+<p>在ModelSerializer中，我们可以重写create()和update()方法，以便在创建和更新对象时执行自定义的逻辑。create()方法接收一个经过验证的数据字典，并返回创建的模型实例。update()方法接收一个模型实例、经过验证的数据字典，返回更新后的模型实例。</p>
+<p>```python
+   class YourModelSerializer(serializers.ModelSerializer):
+       class Meta:
+           model = YourModel
+           fields = '<strong>all</strong>'</p>
+<pre class="codehilite"><code>   def create(self, validated_data):
+       # 自定义逻辑
+       return YourModel.objects.create(**validated_data)
+
+   def update(self, instance, validated_data):
+       # 自定义逻辑
+       instance.name = validated_data.get('name', instance.name)
+       instance.email = validated_data.get('email', instance.email)
+       instance.save()
+       return instance
+</code></pre>
+
+<p>```</p>
+<ol>
+<li>validate()方法：</li>
+</ol>
+<p>在ModelSerializer中，我们可以重写validate()方法，以便在对序列化数据进行验证时执行自定义的逻辑。validate()方法接收一个经过验证的数据字典，并返回验证后的数据字典。如果验证失败，可以抛出ValidationError异常。</p>
+<p>```python
+   class YourModelSerializer(serializers.ModelSerializer):
+       class Meta:
+           model = YourModel
+           fields = '<strong>all</strong>'</p>
+<pre class="codehilite"><code>   def validate(self, data):
+       # 自定义逻辑
+       if 'email' in data and '@' not in data['email']:
+           raise serializers.ValidationError('Invalid email address')
+       return data
+</code></pre>
+
+<p>```</p>
+<ol>
+<li>参数验证：</li>
+</ol>
+<p>DRF提供了各种验证器，可以应用于序列化器的字段或者整个序列化器本身。常用的验证器包括：</p>
+<ul>
+<li>validators：全局验证器，用于验证整个序列化器的数据。</li>
+<li>required：指定字段是否为必填项。</li>
+<li>allow_null：指定字段是否允</li>
+</ul>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

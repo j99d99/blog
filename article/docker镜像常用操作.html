@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>docker镜像常用操作</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>docker镜像常用操作</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>docker</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <h3>Docker镜像管理</h3>
+<p>docker镜像包含启动容器需要的文件系统和数据。镜像主要用于创建并启动容器。</p>
+<p>docker默认镜像在国外，国内下载很慢，我们可以通过配置国内镜像进行加速。</p>
+<h4>配置docker镜像加速</h4>
+<!--more-->
+<p>很多时候由于国内访问国外镜像站速度比较慢，可以尝试使用镜像加速器
+可以地址有
+ustc:   https://docker.mirrors.ustc.edu.cn
+aliyun: https://w57n2hu2.mirror.aliyuncs.com</p>
+<p>修改docker配置文件/etc/docker/daemon.json添加内容如下</p>
+<pre class="codehilite"><code class="language-bash">vim /etc/docker/daemon.json
+
+{
+    &quot;registry-mirros&quot;: [&quot;https://w57n2hu2.mirror.aliyuncs.com&quot;]
+}
+</code></pre>
+
+<p>修改成功后重启docker服务</p>
+<pre class="codehilite"><code class="language-bash">重载配置文件
+systemctl daemon-reload
+重启docker
+systemctl restart docker
+</code></pre>
+
+<h4>登录docker私有镜像仓库</h4>
+<pre class="codehilite"><code class="language-bash">#docker login  仓库地址
+#比如登录阿里云私有仓库，然后按提示输入用户名密码即可登录
+docker login registry.cn-hangzhou.aliyuncs.com
+
+#或者直接将用户名密码放在命令中
+docker login --username=&quot;$user&quot; -p $passwd registry.cn-hangzhou.aliyuncs.com
+</code></pre>
+
+<h4>docker验证配置，解决x509 insecure registry验证配置</h4>
+<pre class="codehilite"><code>vim /etc/docker/daemon.json
+{
+    #添加如下这行
+    &quot;insecure-registries&quot; : [&quot;192.168.1.100:5000&quot;]
+}
+
+#重启docker服务生效
+systemctl restart docker
+</code></pre>
+
+<p>docker镜像操作通过docker命令管理，下面介绍一下与镜像相关的命令</p>
+<h4>搜索镜像</h4>
+<p><strong>docker search</strong></p>
+<p>注意下面两个是有区别的。第一个搜索指定版本的nginx,第二个不带版本号,搜索默认版本latest</p>
+<pre class="codehilite"><code class="language-bash">docker search nginx:1.16.1
+docker search nginx
+</code></pre>
+
+<p>返回结果</p>
+<ul>
+<li>NAME 仓库名称</li>
+<li>DESCRIPTION 镜像描述</li>
+<li>STARS 关注度,反应一个镜像的欢迎程度</li>
+<li>OFFICIAL 是否官方</li>
+<li>AUTOMATED 自动构建，表示该镜像由Docker Hub自动构建流程创建</li>
+</ul>
+<p>OPTION选项说明</p>
+<ul>
+<li>-s 列出关注数大于指定值的镜像</li>
+<li>--no-trunc 显示完整的镜像描述DESCRIPTION</li>
+</ul>
+<h4>下载镜像</h4>
+<p><strong>docker pull</strong></p>
+<p>从docker仓库下载镜像到本地。基本语法</p>
+<p>docker pull 仓库地址/镜像空间/镜像名称:tag号</p>
+<pre class="codehilite"><code class="language-bash">docker pull nginx
+#127.0.0.1:5000表示私有仓库地址
+docker pull 127.0.0.1:5000/test/centos:7
+</code></pre>
+
+<p>镜像默认存储位置/var/lib/docker</p>
+<ul>
+<li>区分同一仓库下的不同镜像,docker提供了标签(TAG)功能,这种机制使得同一仓库可以存储多个镜像</li>
+<li>拉取镜像，可以使用仓库名加上一个冒号和标签(REPOSITORY:TAG)来指定仓库中某一具体的镜像,如果未指定镜像的标签，将下载lastest最新版本</li>
+</ul>
+<h4>查看本地镜像</h4>
+<p><strong>docker images</strong></p>
+<p>返回结果参数解析</p>
+<ul>
+<li>REPOSITORY 镜像所在仓库的名称</li>
+<li>TAG 镜像标签(一般是版本号)</li>
+<li>IMAGE ID 镜像ID</li>
+<li>CREATED 镜像创建时间</li>
+<li>SIZE 镜像大小</li>
+</ul>
+<h4>导出本地镜像</h4>
+<p><strong>docker save</strong></p>
+<p>有时候需要备份或者导出一个镜像，这时我们可以通过docker save命令</p>
+<p>使用语法</p>
+<p>REPOSITORY和TAG为查看本地镜像(docker images)时显示的值</p>
+<pre class="codehilite"><code class="language-bash">docker save REPOSITORY:TAG &gt; images.tar.gz
+#或者使用-o参数输出
+docker save REPOSITORY:TAG -o images.tar.gz
+#例：
+docker save alpine:3.11 &gt; /tmp/alpine-3.11.tar.gz
+</code></pre>
+
+<h4>将镜像导入本地</h4>
+<p><strong>docker load</strong></p>
+<p>现在我们将上文导出的镜像导入另外一台服务器，怎么导入呢？其实也很简单,将镜像文件上传到新服务器的/tmp目录下，然后导入，导入命令如下。</p>
+<pre class="codehilite"><code class="language-bash">docker load &lt; /tmp/alpine-3.11.tar.gz
+#也可以使用-i参数
+docker load -i /tmp/alpine-3.11.tar.gz
+</code></pre>
+
+<h4>删除镜像</h4>
+<p><strong>docker rmi</strong></p>
+<pre class="codehilite"><code class="language-bash">docker rmi alpine:3.11
+</code></pre>
+
+<p>需要注意删除镜像时确保镜像没用被容器使用，如果被使用了。需要先删除容器，可以通过命令查看后删除</p>
+<pre class="codehilite"><code class="language-bash">#查看alpine镜像是否被使用
+docker ps -a|grep alpine
+#删除被使用的容器，CONTAINER ID为容器ID，NAMES为容器名称
+docker rm 容器ID/容器名称
+</code></pre>
+
+<h4>给镜像打tag</h4>
+<pre class="codehilite"><code class="language-bash">#具体格式
+docker tag SOURCE_IMAGE[:TAG] TARGET_IMAGE[:TAG]
+
+
+#给nginx版本号为1.16.1的镜像打成nginx_test:1.16.1
+docker tag nginx:1.16.1 nginx_test:1.16.1
+</code></pre>
+
+<p>以上就是dockers镜像的一些常见操作了。包括镜像加速，搜索、下载、查看、导出、导入和删除操作。</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

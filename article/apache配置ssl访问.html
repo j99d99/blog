@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>apache配置ssl访问</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>apache配置ssl访问</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>apache</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p>apache配置ssl的大致方法如下，具体的根据实际情况进行修改，仅供参考</p>
+<h2>修改httpd.conf的配置文件</h2>
+<pre class="codehilite"><code class="language-bash">vim $Apache_path/conf/httpd.conf
+#将以下两行的&quot;#&quot;注释去掉
+#Include conf/extra/httpd-vhosts.conf
+#Include conf/extra/httpd-ssl.conf
+修改后：
+Include conf/extra/httpd-vhosts.conf
+Include conf/extra/httpd-ssl.conf
+</code></pre>
+
+<!--more-->
+<h2>配置虚拟主机文件</h2>
+<pre class="codehilite"><code class="language-bash">vim  $Apache_path/conf/httpd-ssl.conf(修改证书文件存放目录)
+SSLCertificateFile &quot;$Apache\_path/conf/ssl\_ca/server.crt&quot;    #证书需要事先准备好
+SSLCertificateKeyFile &quot;$Apache\_path/conf/ssl\_ca/server.key&quot;
+</code></pre>
+
+<h2>配置具体的访问配置文件</h2>
+<pre class="codehilite"><code class="language-bash">vim $Apache_path/conf/httpd-vhosts.conf
+NameVirtualHost *:443
+#(此处原本是80端口，使用SSL需修改成443，或者在http.conf内添加一下内容，使用时将注释&quot;#&quot;去掉)
+##NameVirtualHost *:443
+#Listen 443
+#    ServerAdmin webmaster@dummy-host.example.com
+    DocumentRoot &quot;/var/www/test&quot;
+    ServerName www.test.com
+    ServerAlias *.test.com
+    ErrorLog &quot;$ErrorLog_Path&quot;
+    CustomLog &quot;$AccessLog_Path&quot; common
+            Options Indexes FollowSymLinks
+        AllowOverride None
+        Order allow,deny
+        Allow from all
+        ServerAdmin webmaster@dummy-host.example.com
+    DocumentRoot &quot;/var/www/test&quot;
+    ServerName www.test.com:443
+    #ServerAlias www.dummy-host.example.com
+    SSLEngine on
+    SSLCertificateFile &quot;/data/apache2/conf/ssl_ca/server.crt&quot;
+    SSLCertificateKeyFile &quot;/data/apache2/conf/ssl_ca/server.key&quot;
+    ErrorLog &quot;$ErrorLog_Path&quot;
+    CustomLog &quot;$AccessLog_Path&quot; common
+            Options Indexes FollowSymLinks
+        AllowOverride All
+        Order allow,deny
+        Allow from all
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

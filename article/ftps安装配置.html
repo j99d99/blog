@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ftps安装配置</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>ftps安装配置</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>ftp</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p>ftps是一种多传输协议，可以说是加密版的FTP。当你在FTP服务器上上传下载文件的时候，你面临两个风险。第一个风险是在上载文件的时候为文件加密。第二个风险是，这些文件在你等待接收方下载的时候将停留在FTP服务器上，这时你如何保证这些文件的安全。当然你可以选择更优的方案，安全文件传输协议(SFTP)。今天这里呢不介绍sftp，这里来讲解一下ftps。</p>
+<p>FTPS是在安全套接层使用标准的FTP协议和指令的一种增强型TFP协议，为FTP协议和数据通道增加了SSL安全功能。FTPS也称作“FTP-SSL”和“FTP-over-SSL”。SSL是一个在客户机和具有SSL功能的服务器之间的安全连接中对数据进行加密和解密的协议。
+ <!--more--></p>
+<p>1.安装vsftpd服务</p>
+<pre class="codehilite"><code class="language-bash">yum install -y vsftpd
+</code></pre>
+
+<p>2.关闭selinux和防火墙</p>
+<p>3.新建ftp账号</p>
+<pre class="codehilite"><code class="language-bash">useradd -s /sbin/nologin -d /data/ftpstest vsftptest
+</code></pre>
+
+<p>4.配置vsftpd</p>
+<ul>
+<li>1.建立登录用户列表文件</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">cd /etc/vsftpd
+vim vsftp.user
+#添加刚刚新建的ftp账号
+vsftpjiuyun
+</code></pre>
+
+<ul>
+<li>2.生成证书</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">mkdir /etc/vsftpd/ssl -p
+mkdir /etc/vsftpd/ssl/private -p
+ssl证书生成
+openssl req -x509 -nodes -days 720 -newkey rsa:2048 -keyout /etc/vsftpd/ssl/private/vsftpd.key -out /etc/vsftpd/ssl/vsftpd.pem
+Country Name (2 letter code) \[XX\]:CN    #国家
+State or Province Name (full name) \[\]:Zhejiang   #省份
+Locality Name (eg, city) \[Default City\]:Hangzhou    #城市
+Organization Name (eg, company) \[Default Company Ltd\]:RD    #公司
+Organizational Unit Name (eg, section) \[\]:  #直接回车
+Common Name (eg, your name or your server's hostname) \[\]:rdtest.com     #主机名
+Email Address \[\]:mjin@erongdu.com   #邮箱
+</code></pre>
+
+<ul>
+<li>3.修改vsftpd.conf配置文件</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">vim vsftpd.conf
+#修改为
+anonymous_enable=NO
+listen=YES
+#如果没有则添加如下内容
+pam_service_name=vsftpd
+userlist_enable=YES
+chroot_local_user=YES
+userlist_deny=NO
+userlist_file=/etc/vsftpd/vsftp.user
+tcp_wrappers=YES
+
+ssl_enable=YES
+allow_anon_ssl=NO
+ssl_sslv2=YES
+ssl_sslv3=YES
+ssl_tlsv1=YES
+require_ssl_reuse=NO
+force_local_logins_ssl=YES
+force_local_data_ssl=YES
+rsa_cert_file=/etc/vsftpd/ssl/vsftpd.pem
+rsa_private_key_file=/etc/vsftpd/ssl/private/vsftpd.key
+</code></pre>
+
+<ul>
+<li>4.启动vsftpd服务</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">systemctl enable vsftpd
+systemctl start vsftpd
+</code></pre>
+
+<p>安装完成后使用刚刚创建的ftp账号进行连接测试</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

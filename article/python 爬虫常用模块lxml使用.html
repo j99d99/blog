@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>python 爬虫常用模块lxml使用</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>python 爬虫常用模块lxml使用</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <ol>
+<li>lxml库的安装</li>
+</ol>
+<pre class="codehilite"><code class="language-python">pip install lxml
+</code></pre>
+
+<ol>
+<li>xpath常用规则说明</li>
+</ol>
+<p>| 表达式    | 规则描述    |
+| ----------- | ----------- |
+| nodename | 选取此节点打所以子节点，xpath('body') |
+| / | 从当前节点选取直接子节点 |
+| // | 从当前节点选取子孙节点 |
+| . | 选取当前节点 |
+| .. | 选取当前节点的父节点 |
+| @ | 选取属性 |
+| * | 通配符,选取所有元素节点与元素名 |
+| @* | 选取所有属性 |
+| [@attrib] | 选取具有给定属性的所有元素 |
+| @attrib=''value' | 选取给定属性具有给定值得所有元素 |
+| text() |  选取文本，/text()选取标签中直系的文本内容，//text()选取标签中所有文本内容 |</p>
+<p>查找某个特定的节点或者包含某个特定值的节点，用“[]”括起来。</p>
+<p>实例</p>
+<p>| 表达式    | 规则描述    |
+| ----------- | ----------- |
+| /div/p[n] | 选取div子元素的第n个p元素 |
+| /div/p[last()] |  选取div子元素的最后一个p元素 |
+| /div/p[last()-1] |    选取div子元素的倒数第二个p元素 |
+| /div/p[book&lt;n] |  选取div子元素的前n-1个book元素 |
+| //div/[@id] |     选取所有拥有名称为id属性的div节点 |
+| //div[@id='app' |     选取所有div节点，且拥有id属性的值为app的属性 |</p>
+<ol>
+<li>举例</li>
+</ol>
+<pre class="codehilite"><code class="language-python">from lxml import etree,html
+
+ret = &quot;&quot;&quot;
+&lt;div&gt;
+    &lt;ul&gt;
+         &lt;li class=&quot;item-0&quot;&gt;&lt;a href=&quot;link1.html&quot;&gt;第一个&lt;/a&gt;&lt;/li&gt;
+         &lt;li class=&quot;item-1&quot;&gt;&lt;a href=&quot;link2.html&quot;&gt;second item&lt;/a&gt;&lt;/li&gt;
+         &lt;li class=&quot;item-0&quot;&gt;&lt;a href=&quot;link5.html&quot;&gt;a属性&lt;/a&gt;
+     &lt;/ul&gt;
+ &lt;/div&gt;
+
+&quot;&quot;&quot;
+
+
+ret1 = requests.get(&quot;http://www.linke.fun&quot;)
+#从文本获取解析对象，有两种方式etree.HTML()和html.fromstring()方法，对比两种方式，etree解析功能更多，html专解析html
+html = etree.HTML(ret)
+html1 = html.fromstring(ret1.content)
+
+# 读取html文件进行解析
+html2=etree.parse('test.html',etree.HTMLParser())
+
+#获取所有节点
+## 获取所有节点,//表示获取所有子孙节点,*表示所有
+print(html.xpath('//*'))
+
+#获取子节点
+## 获取div下的ul子节点
+print(html.xpath('//div/ul'))
+
+#获取父节点
+## 获取ul节点的父节点,使用.. 或者parent::*
+print(html.xpath('//ul/..'))
+print(html.xpath('//ul/parent::*'))
+
+#按属性匹配节点
+## 一个属性里只有单个属性值获取，通过属性匹配过滤查找节点,形式为[@key=value]
+print(html.xpath('//ul[@id=&quot;002&quot;]/*'))  #选取id=002的ul节点
+
+## 一个属性里有多个属性值时使用contains获取，对比获取class=&quot;aaa item-0&quot;和class=&quot;aaa&quot;区别
+print(html.xpath('//li[@class=&quot;aaa&quot;]/a'))   #只能匹配class=&quot;aaa&quot;
+print(html.xpath('//li[contains(@class,&quot;aaa&quot;)]/a')) # 可以匹配class=&quot;aaa&quot;和class=&quot;aaa item-0&quot;
+
+## 多属性匹配,可以使用and运算符连接,查找&quot;&lt;li class=&quot;aaa&quot; name=&quot;item&quot;&gt;&lt;a href=&quot;link1.html&quot;&gt;第一个&lt;/a&gt;&lt;/li&gt;&quot;
+print(html.xpath('//li[@class=&quot;aaa&quot; and @name=&quot;item&quot;]/a')）
+
+#获取属性
+print(html.xpath('//li[@class=&quot;aaa&quot;]/a/@href)')) #获取a节点打href值
+
+#获取文本
+print(html.xpath('//li[@class=&quot;aaa&quot;]/a/text()')) #获取a节点打文本内容
+
+#顺序选择
+print(html.xpath('//li[contains(@class,&quot;aaa&quot;)]/a/text()')) #获取所有li节点下a节点的内容
+print(html.xpath('//li[1][contains(@class,&quot;aaa&quot;)]/a/text()')) #获取第一个
+print(html.xpath('//li[last()][contains(@class,&quot;aaa&quot;)]/a/text()')) #获取最后一个
+print(html.xpath('//li[position()&gt;2 and position()&lt;4][contains(@class,&quot;aaa&quot;)]/a/text()')) #获取第三个
+print(html.xpath('//li[last()-2][contains(@class,&quot;aaa&quot;)]/a/text()' #获取倒数第三个
+
+## 节点轴选择
+print(html.xpath('//ul/ancestor::*')) # 获取ul节点的所有祖先节点
+print(html.xpath('//ul/ancestor::div')) # 获取ul节点的所有祖先div节点
+print(html.xpath('//li/attribute::class')) # 获取ul节点的所有属性值
+print(html.xpath('//ul/child::li')) # 获取ul节点的所有直接li子节点
+print(html.xpath('//ul/descendant::a')) # 获取ul节点的所有子孙节点的a节点
+print(html.xpath('//ul[@id=001]/following::*')) # 获取当前子节点之后的所有节点,第一个ul节点之后是第二个ul节点，输出为第二个ul节点和它的所有子孙节点
+print(html.xpath('//ul/following-sibling::*')) # 获取当前节点打所有同级节点
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

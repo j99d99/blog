@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>linux下使用rpmbuild定制rpm包</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>linux下使用rpmbuild定制rpm包</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p>以打包源码tengine为例</p>
+<h2>安装rpmbuild命令</h2>
+<pre class="codehilite"><code class="language-bash">yum install rpm-build
+</code></pre>
+
+<h2>基础目录配置</h2>
+<pre class="codehilite"><code class="language-bash">vim .rpmmacros
+#.rpmmacros
+%_topdir /root/rpmbuild
+%_tmppath /root/rpmbuild/tmp
+%buildroot /root/rpmbuild/BUILDROOT
+%_prefix   /
+
+mkdir -pv ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+rpmbuild -showrc|grep _topdir
+</code></pre>
+
+<!--more-->
+<h2>将需要制作的源码包放入~/rpmbuild/SOURCES</h2>
+<p>打包需要用到的文件</p>
+<pre class="codehilite"><code class="language-bash">cd ~/rpmbuild/SOURCES
+ls
+tengine-x.x.x.tar.gz        #软件源码
+init.nginx        #nginx启动脚本
+fastcgi_params    #nginx配置文件
+nginx.conf        #nginx配置文件
+www.conf    #定义好的默认代理配置文件模板
+</code></pre>
+
+<h2>配置rpmbuild配置文件nginx.spec</h2>
+<pre class="codehilite"><code class="language-bash">cd ~/rpmbuild/SPECS
+vim nginx.spec
+Name:           tengine
+Version:        x.x.x
+Release:        1%{?dist}
+Summary:        tengine-x.x.x.tar.gz
+Group:          Applications/Archiving
+License:        GPL
+URL:            http://tengine.taobao.org/
+Source0:        tengine-x.x.x.tar.gz
+Source1:        init.nginx
+Source2:        nginx.conf
+Source3:        fastcgi_params
+Source4:        www.conf
+BuildRequires:  gcc
+Requires:       openssl,openssl-devel,pcre-devel,pcre
+BuildRoot:      %_topdir/BUILDROOT
+%description
+Custom a rpm by yourself!Build tengine-2.1.2.tar.gz to tengine-2.1.2-1.el6.x86_64.rpm
+%prep
+%setup -q
+%build
+./configure --prefix=/usr/local/nginx \
+--conf-path=/etc/nginx/nginx.conf \
+--sbin-path=/usr/sbin/nginx \
+--with-http\_ssl\_module \
+--with-http\_realip\_module \
+--with-http\_addition\_module \
+--with-http\_image\_filter_module \
+--with-http\_sub\_module \
+--with-http\_dav\_module \
+--with-http\_flv\_module \
+--with-http\_mp4\_module \
+--with-http\_gzip\_static_module \
+--with-http\_concat\_module \
+--with-http\_random\_index_module \
+--with-http\_secure\_link_module \
+--with-http\_degradation\_module \
+--with-http\_sysguard\_module \
+--with-backtrace_module \
+--with-http\_stub\_status_module \
+--with-http\_upstream\_check_module \
+--with-debug --with-http\_realip\_module
+make %{?\_smp\_mflags}
+%install
+rm -rf %{buildroot}
+make install DESTDIR=%{buildroot}
+%{__install} -p -D -m 0755 %{SOURCE1} %{buildroot}/etc/rc.d/init.d/nginx
+%{__install} -p -D %{SOURCE2} %{buildroot}/etc/nginx/nginx.conf
+%{\_\_install} -p -D %{SOURCE3} %{buildroot}/etc/nginx/fastcgi\_params
+%{__install} -p -D %{SOURCE4} %{buildroot}/etc/nginx/vhosts/www.conf
+
+%clean
+rm -rf %{buildroot}
+%pre
+%post
+%preun
+%postun
+rm -rf /usr/local/nginx
+
+%files
+%defattr(-,root,root)
+/etc/nginx/
+/usr/local/nginx
+/usr/sbin/nginx
+/etc/rc.d/init.d/nginx
+
+
+%changelog
+* Tue date   - x.x.x-x
+- Initial version
+</code></pre>
+
+<h2>执行命令</h2>
+<pre class="codehilite"><code class="language-bash">rpmbuild –ba nginx.spec
+</code></pre>
+
+<h2>执行完毕,rpm被放入~/rpmbuild/RPMS目录，可自行测试打包文件是否正确</h2>
+<pre class="codehilite"><code class="language-bash">cd ~/rpmbuild/RPMS
+ls
+</code></pre>
+
+<p><strong>注意事项：</strong></p>
+<pre class="codehilite"><code class="language-bash">Source文件每添加一个，都需在%install段和%file段内添加
+%build段之前的
+%pre表示编译前的工作（源码解压，进入解压包等）
+%setup –q(用来完成%pre段内的所有工作，-q表示静默完成)
+%install（make install）段内的
+%pre表示安装前的工作
+%post表示安装后的工作
+%preun表示卸载前的工作
+%postun表示卸载后的工作
+%files段需要包含到rpm包内的文件，buildroot文件夹内的文件都需要包含进去，否则会报错
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

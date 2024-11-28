@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>openvpn_docker</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>openvpn_docker</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+
+        </div>
+        
+        <div class="container article">
+            <hr />
+<p>title: openvpn+frp实现无固定IP的vpn搭建
+tags: 
+  - linux
+category:
+  - linux
+top: false
+hidden: false</p>
+<hr />
+<h1>openVPN</h1>
+<h2>生成配置文件</h2>
+<p>docker run -v /data/OpenVPN/:/etc/openvpn --rm kylemanna/openvpn:2.4 ovpn_genconfig -u tcp://192.168.10.114</p>
+<h2>生成秘钥文件</h2>
+<p>docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 ovpn_initpki</p>
+<h2>生成客户端证书,hehuvpntest为自定义的用户名证书，nopass 创建无密码用户</h2>
+<p>docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 easyrsa build-client-full hehuvpntest nopass</p>
+<h2>导出证书</h2>
+<p>docker run -v /data/OpenVPN/:/etc/openvpn --rm kylemanna/openvpn:2.4 ovpn_getclient hehuvpntest &gt; /tmp/conf/hehuvpntest.ovpn</p>
+<h2>启动OpenVPN服务</h2>
+<p>docker run --name openvpn --restart=always -v /data/OpenVPN/:/etc/openvpn -d -p 1194:1194 --cap-add=NET_ADMIN kylemanna/openvpn:2.4</p>
+<h2>添加用户</h2>
+<pre class="codehilite"><code class="language-bash">#!/bin/bash
+read -p &quot;please your username: &quot; NAME
+docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 easyrsa build-client-full $NAME nopass
+docker run -v /data/OpenVPN/:/etc/openvpn --rm kylemanna/openvpn:2.4 ovpn_getclient $NAME &gt; /tmp/conf/&quot;$NAME&quot;.ovpn
+docker restart openvpn
+</code></pre>
+
+<h2>删除用户</h2>
+<pre class="codehilite"><code class="language-bash">#!/bin/bash
+read -p &quot;Delete username: &quot; DNAME
+docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 easyrsa revoke $DNAME
+docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 easyrsa gen-crl
+docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 rm -f /etc/openvpn/pki/reqs/&quot;$DNAME&quot;.req
+docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 rm -f /etc/openvpn/pki/private/&quot;$DNAME&quot;.key
+docker run -v /data/OpenVPN/:/etc/openvpn --rm -it kylemanna/openvpn:2.4 rm -f /etc/openvpn/pki/issued/&quot;$DNAME&quot;.crt
+docker restart openvpn
+</code></pre>
+
+<h1>frp server端配置</h1>
+<pre class="codehilite"><code class="language-bash">[common]
+bind_port = 7000
+</code></pre>
+
+<h2>配置systemd</h2>
+<pre class="codehilite"><code class="language-bash">[Unit]
+Description = frp server
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+# 启动frps的命令，需修改为您的frps的安装路径
+ExecStart = /usr/local/frp/frps -c /usr/local/frp/frps.ini
+
+[Install]
+WantedBy = multi-user.target
+</code></pre>
+
+<h1>frp client配置</h1>
+<pre class="codehilite"><code class="language-bash">[common]
+server_addr = 121.37.216.82
+server_port = 7000
+
+[OpenVPN]
+type = tcp
+local_ip = 192.168.10.114
+local_port = 1194
+remote_port = 6000
+</code></pre>
+
+<h2>配置systemd</h2>
+<pre class="codehilite"><code class="language-bash">[Unit]
+Description = frp server
+After = network.target syslog.target
+Wants = network.target
+
+[Service]
+Type = simple
+# 启动frpc的命令，需修改为您的frpc的安装路径
+ExecStart = /usr/local/frp/frpc -c /usr/local/frp/frpc.ini
+
+[Install]
+WantedBy = multi-user.target
+</code></pre>
+
+<h1>测试连接</h1>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

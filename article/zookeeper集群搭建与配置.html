@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zookeeper集群搭建与配置</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>zookeeper集群搭建与配置</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>zookeeper</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <h2>服务器信息</h2>
+<p>| hosts | ip |
+| ---- | ---- |
+| zookeeper01 | 192.168.122.217 |
+| zookeeper02 | 192.168.122.132 |
+| zookeeper03 | 192.168.122.112 |</p>
+<h2>软件版本</h2>
+<pre class="codehilite"><code>    jdk-7u80-linux-x64.rpm
+    zookeeper-3.4.6.tar.gz
+    官方下载地址:http://www.apache.org/dyn/closer.cgi/zookeeper/
+</code></pre>
+
+<h2>安装jdk</h2>
+<p>三台服务器均需要安装</p>
+<!--more-->
+
+<pre class="codehilite"><code>rpm -vih jdk-7u80-linux-x64.rpm
+</code></pre>
+
+<h2>zookeeper的安装配置</h2>
+<h3>在zookeeper01上</h3>
+<pre class="codehilite"><code>tar zxvf zookeeper-3.4.6.tar.gz 
+mv zookeeper-3.4.6 /usr/local/zookeeper-3.4.6
+vim /etc/profile
+......
+#设置zookeeper环境变量
+#ZOOKEEPER  
+ZOOKEEPER=/usr/local/zookeeper-3.4.6 
+PATH=$PATH:$ZOOKEEPER/bin
+
+source /etc/profile
+cp /usr/local/zookeeper-3.4.6/conf/zoo_sample.cfg /usr/local/zookeeper-3.4.6/conf/zoo.cfg     #拷贝zookeeper的配置文件
+cd /usr/local/zookeeper-3.4.6/conf
+sed -i 's#dataDir=/tmp/zookeeper#dataDir=/data/zookeeper#g' zoo.cfg    #修改data目录
+vim zoo.cfg
+......
+#server.A=B：C：D：A表示第几号服务器；B 是这个服务器的 ip 地址；C 与集群中的 Leader 服务器交换信息的端口；D 表示Leader 服务器挂了，执行选举时服务器相互通信的端口
+server.1=192.168.122.217:2888:3888 
+server.2=192.168.122.132:2888:3888
+server.3=192.168.122.112:2888:3888
+
+mkdir -p /data/zookeeper
+cd /data/zookeeper/
+vim myid  #常见myid文件
+1   #此处的1对应server.1
+#启动zookeeper
+zkServer.sh start
+</code></pre>
+
+<h3>在zookeeper02上</h3>
+<pre class="codehilite"><code>tar zxvf zookeeper-3.4.6.tar.gz 
+mv zookeeper-3.4.6 /usr/local/zookeeper-3.4.6
+vim /etc/profile
+......
+#设置zookeeper环境变量
+#ZOOKEEPER  
+ZOOKEEPER=/usr/local/zookeeper-3.4.6 
+PATH=$PATH:$ZOOKEEPER/bin
+
+source /etc/profile
+
+cp /usr/local/zookeeper-3.4.6/conf/zoo_sample.cfg /usr/local/zookeeper-3.4.6/conf/zoo.cfg     #拷贝zookeeper的配置文件
+cd /usr/local/zookeeper-3.4.6/conf
+sed -i 's#dataDir=/tmp/zookeeper#dataDir=/data/zookeeper#g' zoo.cfg    #修改data目录
+
+vim zoo.cfg
+......
+#server.A=B：C：D：A表示第几号服务器；B 是这个服务器的 ip 地址；C 与集群中的 Leader 服务器交换信息的端口；D 表示Leader 服务器挂了，执行选举时服务器相互通信的端口
+server.1=192.168.122.217:2888:3888 
+server.2=192.168.122.132:2888:3888
+server.3=192.168.122.112:2888:3888
+
+mkdir -p /data/zookeeper
+cd /data/zookeeper/
+vim myid  #常见myid文件
+2   #此处的2对应server.2
+#启动zookeeper
+zkServer.sh start
+</code></pre>
+
+<h5>在zookeeper03上</h5>
+<pre class="codehilite"><code>tar zxvf zookeeper-3.4.6.tar.gz 
+mv zookeeper-3.4.6 /usr/local/zookeeper-3.4.6
+vim /etc/profile
+......
+#设置zookeeper环境变量
+#ZOOKEEPER  
+ZOOKEEPER=/usr/local/zookeeper-3.4.6 
+PATH=$PATH:$ZOOKEEPER/bin
+
+source /etc/profile
+cp /usr/local/zookeeper-3.4.6/conf/zoo_sample.cfg /usr/local/zookeeper-3.4.6/conf/zoo.cfg     #拷贝zookeeper的配置文件
+cd /usr/local/zookeeper-3.4.6/conf
+sed -i 's#dataDir=/tmp/zookeeper#dataDir=/data/zookeeper#g' zoo.cfg    #修改data目录
+vim zoo.cfg
+......
+#server.A=B：C：D：A表示第几号服务器；B 是这个服务器的 ip 地址；C 与集群中的 Leader 服务器交换信息的端口；D 表示Leader 服务器挂了，执行选举时服务器相互通信的端口
+server.1=192.168.122.217:2888:3888 
+server.2=192.168.122.132:2888:3888
+server.3=192.168.122.112:2888:3888
+mkdir -p /data/zookeeper
+cd /data/zookeeper/
+vim myid  #常见myid文件
+3   #此处的3对应server.3
+#启动zookeeper
+zkServer.sh start
+</code></pre>
+
+<h3>查看zookeeper状态</h3>
+<pre class="codehilite"><code>#zookeeper01
+zkServer.sh status
+JMX enabled by default
+Using config: /usr/local/zookeeper-3.4.6/bin/../conf/zoo.cfg
+Mode: leader    #区别另外两台
+
+#zookeeper02
+zkServer.sh status
+JMX enabled by default
+Using config: /usr/local/zookeeper-3.4.6/bin/../conf/zoo.cfg
+Mode: follower
+
+#zookeeper03
+zkServer.sh status
+JMX enabled by default
+Using config: /usr/local/zookeeper-3.4.6/bin/../conf/zoo.cfg
+Mode: follower
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

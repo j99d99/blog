@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用Xtrabackup备份恢复mysql</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>使用Xtrabackup备份恢复mysql</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>mysql</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <h4>安装Xtrabackup</h4>
+<pre class="codehilite"><code># 安装Percona的repository
+yum install -y http://www.percona.com/downloads/percona-release/redhat/0.1-4/percona-release-0.1-4.noarch.rpm
+#安装xtrabackup
+yum install percona-xtrabackup-24 -y
+</code></pre>
+
+<!--more-->
+<h4>建立并授权数据库备份账号</h4>
+<pre class="codehilite"><code>mysql&gt; CREATE USER 'bkpuser'@'localhost' IDENTIFIED BY 's3cret';
+mysql&gt; GRANT RELOAD, LOCK TABLES, PROCESS, REPLICATION CLIENT ON *.* TO
+       'bkpuser'@'localhost';
+mysql&gt; FLUSH PRIVILEGES;
+</code></pre>
+
+<h4>配置备份存放位置</h4>
+<pre class="codehilite"><code>vim /etc/my.cnf
+[xtrabackup]
+target_dir = /data/backups/mysql/ #或者在命令行指定参数--target-dir=/data/backups/mysql
+</code></pre>
+
+<h4>完全备份</h4>
+<p>全量备份</p>
+<pre class="codehilite"><code>xtrabackup --user=bkpuser --password=s3cret --backup --target-dir=/data/backups/
+#将数据备份到/data/backups,如果目录不存在将创建,如果目录存在且不是空目录,则会备份失败
+</code></pre>
+
+<p>全量备份的数据恢复</p>
+<pre class="codehilite"><code>1.准备恢复文件
+xtrabackup --prepare --target-dir=/data/backups/
+#过程不能中断，中断会无法保证恢复数据有效性
+2.恢复备份
+#恢复前关闭MySQL服务，并保证恢复的目录是空的
+xtrabackup --copy-back --target-dir=/data/backups/
+或者
+rsync -avrP /data/backups/ /var/lib/mysql/
+chown -R mysql:mysql /var/lib/mysql
+</code></pre>
+
+<h4>增量备份</h4>
+<h5>先做全量备份</h5>
+<pre class="codehilite"><code>xtrabackup --user=bkpuser --password=s3cret --backup --target-dir=/data/backups/base
+</code></pre>
+
+<h5>基于全量备份做增量备份</h5>
+<pre class="codehilite"><code> xtrabackup --user=bkpuser --password=s3cret --backup --target-dir=/data/backups/inc1 --incremental-basedir=/data/backups/base
+ xtrabackup --backup --target-dir=/data/backups/inc2 --incremental-basedir=/data/backups/inc1
+</code></pre>
+
+<h4>增量备份的数据恢复</h4>
+<h5>准备数据</h5>
+<p>a.准备全量备份的数据</p>
+<pre class="codehilite"><code>xtrabackup --prepare --apply-log-only --target-dir=/data/backups/base
+#--apply-log-only是必须的，放在回滚，导致备份不可用
+</code></pre>
+
+<p>b.准备增量备份的数据</p>
+<pre class="codehilite"><code>xtrabackup --prepare --apply-log-only --target-dir=/data/backups/base --incremental-dir=/data/backups/inc1
+</code></pre>
+
+<p>c.以此类推，准备最后一个增量备份数据(注意最后一个增量文件可以不需要 参数--apply-log-only )</p>
+<pre class="codehilite"><code>xtrabackup --prepare --target-dir=/data/backups/base --incremental-dir=/data/backups/inc2
+</code></pre>
+
+<p>2.恢复备份</p>
+<pre class="codehilite"><code>#恢复前关闭MySQL服务，并保证恢复的目录是空的
+xtrabackup --copy-back --target-dir=/data/backups/
+或者直接拷贝
+rsync -avrP /data/backup/ /var/lib/mysql/
+chown -R mysql:mysql /var/lib/mysql
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

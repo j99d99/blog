@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编写shell脚本常用的一些用法</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>编写shell脚本常用的一些用法</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>shell</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <h1>shell脚本常用判断</h1>
+<h2>shell变量</h2>
+<h4>变量的赋值</h4>
+<p><strong>注意：</strong> 赋值语句<code>=</code>左右不能有空格</p>
+<pre class="codehilite"><code class="language-bash"># 直接赋值：
+name=&quot;test&quot;
+
+# 语句赋值
+for i in `ls`   #将ls的结果作为变量值
+</code></pre>
+
+<h4>变量的使用</h4>
+<pre class="codehilite"><code class="language-bash">echo $name
+echo ${name}
+</code></pre>
+
+<h4>变量的高级用法</h4>
+<ul>
+<li>当变量没有声明时，直接使用赋予默认值,语法<code>${var=Default}</code></li>
+</ul>
+<pre class="codehilite"><code class="language-bash"># 当name变量没有声明时，name变量的默认值是test
+echo ${name=&quot;test&quot;}     
+</code></pre>
+
+<ul>
+<li>当变量没有声明或者申明的变量为空字符串时，赋予默认值,语法<code>${var:=Default}</code></li>
+</ul>
+<pre class="codehilite"><code class="language-bash">name=&quot;&quot;
+# 此时name变量的在值为空字符串，name变量的默认值是test
+echo ${name:=&quot;test&quot;} 
+</code></pre>
+
+<h2>数字运算</h2>
+<p>数字运算的两个变量必须是数字或者数字字符串，数字运算采用的语法是<code>$((num1 + num2))</code></p>
+<h4>数字运算符</h4>
+<p>| 符号 | 解释 | 举例 |
+| ----------- | ----------- | ----------- |
+| + | 加  | $((num1 + num2)) |
+| - | 减 | $((num1 - num2)) |
+| * |  乘 | $((num1 * num2)) |
+| / | 除 | $((num1 / num2)) |
+| % | 求余 | $((num1 % num2)) |
+| ** | 乘方 | $((num1 ** num2)) |</p>
+<p>对于复杂运算，可以 通过括号来区分先后顺序</p>
+<pre class="codehilite"><code class="language-bash"># 举例： 先进行num1和num2相加，在与num3相乘
+$(((num1 + num2) * num3))
+</code></pre>
+
+<h2>字符串</h2>
+<p>字符串的定义可以使用单引号，也可以使用双引号来定义
+<strong>两者的区别在于</strong>
+    单引号字符串中引用的变量或者符合不会被解析或者转义
+    双引号字符串中引用则会解析或者转义</p>
+<h4>字符串定义</h4>
+<pre class="codehilite"><code class="language-bash">#!/bin/bash
+#定义一个变量
+name=&quot;test string&quot;
+
+#${name}原样输出，没有变成${name}的变量值
+test_string1='this is a ${name}'    
+echo ${test_string1}
+
+#${name}输出${name}的变量值
+test_string2=&quot;this is a ${name}&quot;
+echo ${test_string2}
+</code></pre>
+
+<h4>字符串连接</h4>
+<pre class="codehilite"><code class="language-bash">#将上面定义的两个字符串变量test_string1和test_string2连接起来输出
+
+echo ${test_string1} ${test_string2}
+</code></pre>
+
+<h4>字符串长度</h4>
+<pre class="codehilite"><code class="language-bash">#计算变量${test_string1}的长度
+echo ${#test_string1}
+</code></pre>
+
+<h4>截取字符串</h4>
+<h5>普通截取</h5>
+<p>字符串截取下标索引从0开始</p>
+<pre class="codehilite"><code class="language-bash">#显示完整的字符串
+echo ${test_string1}
+
+#字符串从下标为2的位置开始输出
+echo ${test_string1:2}
+
+#字符串从下标为2的位置开始输出，并且输出长度为5
+echo ${test_string1:2:5}
+
+#从字符串从下标为-2的位置开始输出
+echo ${tset_string1:(-2)}
+
+#从字符串从下标为-2的位置开始输出，并且输出长度为5
+echo ${tset_string1:(-2):5}
+</code></pre>
+
+<h5>字符串匹配截取</h5>
+<p>分两种
+1. 从开头开始匹配，左到右
+    语法:
+    echo ${var#正则表达式}  截取第一个匹配到表达式后面的字符串
+    echo ${var##正则表达式}  截取最后一个匹配到表达式后面的字符串</p>
+<ol>
+<li>从结尾开始匹配，从右到左
+    echo ${var%正则表达式}  截取从右到左第一个匹配到表达式前面的字符串
+    echo ${var%%正则表达式}  截取从右到左最后一个匹配到表达式前面的字符串</li>
+</ol>
+<pre class="codehilite"><code class="language-bash">#定义一个路径变量
+test_path=/usr/local/src/sa/local/sb/src
+
+#从左向右匹配截取
+echo ${test_path#*/local}
+#输出结果: /src/sa/local/sb/src
+
+
+echo ${test_path##*/local}
+#输出结果: sb/src
+
+
+
+#从右向左匹配截取
+
+echo ${test_path%/local*}
+#输出结果: /usr/local/src/sa
+
+echo ${test_path%%/local*}
+#输出结果: /usr
+</code></pre>
+
+<p>匹配截取的一个高级用法，用来快速截取路径和文件名</p>
+<pre class="codehilite"><code class="language-bash">test_file=/var/www/html/index.html
+
+#获取文件名
+echo ${test_file##*/}
+
+#获取文件路径
+echo ${test_file%/*}
+</code></pre>
+
+<h4>字符串替换</h4>
+<p>字符串内置替换功能
+语法：
+${变量/查找正则表单/替换值} 一个"/"表示替换第一个，"//"表示替换所有</p>
+<pre class="codehilite"><code class="language-bash">test_path=&quot;/home/work/home/.vimrc&quot;
+
+echo ${test_path/.vimrc/.vimbashrc}
+输出结果: /home/work/home/.vimbashrc
+
+echo ${test_path/home/usr}
+输出结果: /usr/work/home/.vimrc
+
+echo ${test_path//home/usr}
+输出结果: /usr/work/usr/.vimrc
+</code></pre>
+
+<h2>逻辑判断</h2>
+<p>| 符号 | 解释 |
+| ----------- | ----------- |
+|[] |中括号一般是比较|
+|() |小括号一般是判断|</p>
+<h4>字符串比较</h4>
+<p>| 符号 | 解释 |
+| ----------- | ----------- |
+|=|判断两个字符串是否相等|
+|!=|判断两个字符串不相等|
+|-n|判断字符串长度是否大于0|
+|-z|判断字符串长度是否为0|
+|&gt;,\&lt;|字符串比较大小(使用时需要加上转义字符'\')|</p>
+<h4>数字比较</h4>
+<p>| 符号 |解释 |
+| ----------- | ----------- | 
+| -eq | 等于 | 
+|-ne |不等于 |
+|-lt |小于 |
+|-gt |大于 |
+|-le |小于或等于 |
+|-ge |大于或等于| </p>
+<h4>文件的判断</h4>
+<p>| 符号 |解释 | 
+| ----------- | ----------- |
+| –b  | 当file存在并且是块文件时返回真 |
+| -c  | 当file存在并且是字符文件时返回真 |
+| -d  | 当pathname存在并且是一个目录时返回真 |
+| -e  | 当pathname指定的文件或目录存在时返回真 |
+| -f  | 当file存在并且是正规文件时返回真 |
+| -g  | 当由pathname指定的文件或目录存在并且设置了SGID位时返回为真 |
+| -h  | 当file存在并且是符号链接文件时返回真，该选项在一些老系统上无效 |
+| -k  | 当由pathname指定的文件或目录存在并且设置了“粘滞”位时返回真 |
+| -p  | 当file存在并且是命令管道时返回为真 |
+| -r  | 当由pathname指定的文件或目录存在并且可读时返回为真 |
+| -s  | 当file存在文件大小大于0时返回真 |
+| -u  | 当由pathname指定的文件或目录存在并且设置了SUID位时返回真 |
+| -w  | 当由pathname指定的文件或目录存在并且可执行时返回真。一个目录为了它的内容被访问必然是可执行的。 |
+| -o  | 当由pathname指定的文件或目录存在并且被子当前进程的有效用户ID所指定的用户拥有时返回真 |</p>
+<h4>复杂逻辑判断</h4>
+<p>|符号|解释|
+| ----------- | ----------- |
+|-a |双方都成立（and）|
+|-o |单方成立（or）|
+|!|非|</p>
+<h4>while循环</h4>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

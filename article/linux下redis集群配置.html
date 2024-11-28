@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>linux下redis集群配置</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>linux下redis集群配置</h3>
+        <div class="tag-container">
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>linux</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>redis</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <h1>集群环境介绍</h1>
+<p>redis集群环境搭建，下面是一个三台服务器组件完成的redis集群</p>
+<p>| host    | ip   |
+| ----------- | ----------- |
+| redis1 | 192.168.122.217 |
+| redis2 | 192.168.122.132 |
+| redis3 | 192.168.122.112 |</p>
+<h1>redis的安装</h1>
+<h2>安装</h2>
+<pre class="codehilite"><code class="language-bash">wget http://download.redis.io/releases/redis-3.0.4.tar.gz         #下载软件
+yum install -y gcc-c++        #安装gcc-c++依赖,初始最小化系统未安装，需安装
+tar zxvf redis-3.0.4.tar.gz
+cd redis-3.0.4
+make PREFIX=/usr/local/redis6379 install        #一台服务器安装两个redis,所以命名以端口区分
+make PREFIX=/usr/local/redis6380 install
+</code></pre>
+
+<!--more-->
+
+<h2>redis的初始配置</h2>
+<pre class="codehilite"><code class="language-bash">[root@redis01 redis-3.0.4]# cd utils/
+[root@redis01 utils]# sh install_server.sh  ##redis6379的初始化配置
+Welcome to the redis service installer
+This script will help you easily set up a running redis server
+
+Please select the redis port for this instance: [6379]  #默认6379端口,不需要修改，直接回车即可
+Selecting default: 6379
+Please select the redis config file name [/etc/redis/6379.conf]     #默认，直接回车即可
+Selected default - /etc/redis/6379.conf
+Please select the redis log file name [/var/log/redis_6379.log] /data/weblogs/redis/redis_6379.log  #修改redis6379的日志路径
+Please select the data directory for this instance [/var/lib/redis/6379] /data/redis/6379           #修改redis6379实例数据位置
+Please select the redis executable path [] /usr/local/redis6379/bin/redis-server                #redis6379的执行文件目录
+Selected config:
+Port           : 6379
+Config file    : /etc/redis/6379.conf
+Log file       : /data/weblogs/redis/redis_6379.log
+Data dir       : /data/redis/6379
+Executable     : /usr/local/redis6379/bin/redis-server
+Cli Executable : /usr/local/redis6379/bin/redis-cli
+Is this ok? Then press ENTER to go on or Ctrl-C to abort.
+Copied /tmp/6379.conf =&gt; /etc/init.d/redis_6379
+Installing service...
+Successfully added to chkconfig!
+Successfully added to runlevels 345!
+Starting Redis server...
+Installation successful!
+
+[root@redis01 utils]# sh install_server.sh  ##redis6380的初始化配置 
+Welcome to the redis service installer
+This script will help you easily set up a running redis server
+
+Please select the redis port for this instance: [6379] 6380         ##配置redis6380的端口为6380
+Please select the redis config file name [/etc/redis/6380.conf]     #配置文件路径，直接回车即可
+Selected default - /etc/redis/6380.conf
+Please select the redis log file name [/var/log/redis_6380.log] /data/weblogs/redis/redis_6380.log      #修改redis6380的日志路径
+Please select the data directory for this instance [/var/lib/redis/6380] /data/redis/6380               #修改redis6380实例数据位置
+Please select the redis executable path [] /usr/local/redis6380/bin/redis-server                        #redis6380的执行文件目录
+Selected config:
+Port           : 6380
+Config file    : /etc/redis/6380.conf
+Log file       : /data/weblogs/redis/redis_6380.log
+Data dir       : /data/redis/6380
+Executable     : /usr/local/redis6380/bin/redis-server
+Cli Executable : /usr/local/redis6380/bin/redis-cli
+Is this ok? Then press ENTER to go on or Ctrl-C to abort.
+Copied /tmp/6380.conf =&gt; /etc/init.d/redis_6380
+Installing service...
+Successfully added to chkconfig!
+Successfully added to runlevels 345!
+Starting Redis server...
+Installation successful!
+</code></pre>
+
+<h2>开启redis持久化</h2>
+<ul>
+<li>1.修改redis配置文件</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">sed -i 's/appendonly no/appendonly yes/g' /etc/redis/6379.conf
+sed -i 's/appendonly no/appendonly yes/g' /etc/redis/6380.conf
+</code></pre>
+
+<ul>
+<li>2.重启生效</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">#重启服务
+service redis_6379 restart 
+service redis_6380 restart
+
+#查看是否有持久化文件
+ls /data/redis/6379/
+appendonly.aof  dump.rdb        
+
+ls /data/redis/6380/
+appendonly.aof  dump.rdb
+</code></pre>
+
+<h1>集群配置</h1>
+<p><strong>以redis01为例，另外两台操作相同</strong></p>
+<h2>开启redis集群相关配置项</h2>
+<pre class="codehilite"><code class="language-bash">#修改redis6379
+[root@redis01 ~]# sed -i 's/# cluster-enabled yes/cluster-enabled yes/g' /etc/redis/6379.conf
+[root@redis01 ~]# sed -i 's/# cluster-config-file nodes-6379.conf/cluster-config-file nodes-6379.conf/g' /etc/redis/6379.conf
+[root@redis01 ~]# sed -i 's/# cluster-node-timeout 15000/cluster-node-timeout 5000/g' /etc/redis/6379.conf
+
+#修改redis6380
+[root@redis01 ~]# sed -i 's/# cluster-enabled yes/cluster-enabled yes/g' /etc/redis/6380.conf
+[root@redis01 ~]# sed -i 's/# cluster-config-file nodes-6379.conf/cluster-config-file nodes-6380.conf/g' /etc/redis/6380.conf
+[root@redis01 ~]# sed -i 's/# cluster-node-timeout 15000/cluster-node-timeout 5000/g' /etc/redis/6380.conf
+
+#重启redis服务
+[root@redis01 ~]# service redis_6379 restart 
+Stopping ...
+Redis stopped
+Starting Redis server...
+[root@redis01 ~]# service redis_6380 restart
+Stopping ...
+Redis stopped
+Starting Redis server...
+</code></pre>
+
+<h2>安装集群需要的组件</h2>
+<pre class="codehilite"><code class="language-bash">yum -y  install zlib ruby rubygems rubygems-devel
+gem install redis  --version 3.0.4
+</code></pre>
+
+<h2>配置集群</h2>
+<p>在redis源码目录下有一个<code>src/redis-trib.rd</code>命令，用来创建redis集群，只需要在三台中的一台撒谎给你操作即可</p>
+<pre class="codehilite"><code class="language-bash">cd redis-3.0.4
+
+#创建集群
+./src/redis-trib.rb create --replicas 1 192.168.122.217:6379 192.168.122.217:6380 192.168.122.132:6379 192.168.122.132:6380 192.168.122.112:6379 192.168.122.112:6380
+&gt;&gt;&gt; Creating cluster
+Connecting to node 192.168.122.217:6379: OK
+Connecting to node 192.168.122.217:6380: OK
+Connecting to node 192.168.122.132:6379: OK
+Connecting to node 192.168.122.132:6380: OK
+Connecting to node 192.168.122.112:6379: OK
+Connecting to node 192.168.122.112:6380: OK
+&gt;&gt;&gt; Performing hash slots allocation on 6 nodes...
+Using 3 masters:
+192.168.122.112:6379
+192.168.122.217:6379
+192.168.122.132:6379
+Adding replica 192.168.122.217:6380 to 192.168.122.112:6379
+Adding replica 192.168.122.112:6380 to 192.168.122.217:6379
+Adding replica 192.168.122.132:6380 to 192.168.122.132:6379
+M: 6343d46d255182e0e116dfad536028702e776251 192.168.122.217:6379
+   slots:5461-10922 (5462 slots) master
+S: 28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380
+   replicates c18bae19c335c2bfad4c4628d562bd937bd608ec
+M: 3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379
+   slots:10923-16383 (5461 slots) master
+S: 5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380
+   replicates 3bde122a2d531d562f932657a67ae0461479cbd1
+M: c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379
+   slots:0-5460 (5461 slots) master
+S: c67e2adf957cb6f123103c677fb998135ca61a5b 192.168.122.112:6380
+   replicates 6343d46d255182e0e116dfad536028702e776251
+Can I set the above configuration? (type 'yes' to accept): yes  #确认集群节点信息
+&gt;&gt;&gt; Nodes configuration updated
+&gt;&gt;&gt; Assign a different config epoch to each node
+&gt;&gt;&gt; Sending CLUSTER MEET messages to join the cluster
+Waiting for the cluster to join....
+&gt;&gt;&gt; Performing Cluster Check (using node 192.168.122.217:6379)
+M: 6343d46d255182e0e116dfad536028702e776251 192.168.122.217:6379
+   slots:5461-10922 (5462 slots) master
+M: 28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380
+   slots: (0 slots) master
+   replicates c18bae19c335c2bfad4c4628d562bd937bd608ec
+M: 3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379
+   slots:10923-16383 (5461 slots) master
+M: 5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380
+   slots: (0 slots) master
+   replicates 3bde122a2d531d562f932657a67ae0461479cbd1
+M: c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379
+   slots:0-5460 (5461 slots) master
+M: c67e2adf957cb6f123103c677fb998135ca61a5b 192.168.122.112:6380
+   slots: (0 slots) master
+   replicates 6343d46d255182e0e116dfad536028702e776251
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.  #表示集群创建完成
+</code></pre>
+
+<h2>查看集群节点</h2>
+<pre class="codehilite"><code class="language-bash">/usr/local/redis6379/bin/redis-cli -c -p 6379   #登录集群
+
+127.0.0.1:6379&gt; cluster nodes       #查看集群节点信息
+6343d46d255182e0e116dfad536028702e776251 192.168.122.217:6379 myself,master - 0 0 1 connected 5461-10922
+c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379 master - 0 1478586739489 5 connected 0-5460
+c67e2adf957cb6f123103c677fb998135ca61a5b 192.168.122.112:6380 slave 6343d46d255182e0e116dfad536028702e776251 0 1478586740491 6 connected
+28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380 slave c18bae19c335c2bfad4c4628d562bd937bd608ec 0 1478586739991 5 connected
+3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379 master - 0 1478586739489 3 connected 10923-16383
+5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380 slave 3bde122a2d531d562f932657a67ae0461479cbd1 0 1478586740491 4 connected
+
+
+127.0.0.1:6379&gt; cluster info    #查看集群信息
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:6
+cluster_size:3
+cluster_current_epoch:6
+cluster_my_epoch:1
+cluster_stats_messages_sent:10661
+cluster_stats_messages_received:10661
+</code></pre>
+
+<h2>检查集群节点状态</h2>
+<pre class="codehilite"><code class="language-bash">./src/redis-trib.rb check 192.168.122.217:6379
+
+Connecting to node 192.168.122.217:6379: OK
+Connecting to node 192.168.122.112:6379: OK
+Connecting to node 192.168.122.112:6380: OK
+Connecting to node 192.168.122.217:6380: OK
+Connecting to node 192.168.122.132:6379: OK
+Connecting to node 192.168.122.132:6380: OK
+&gt;&gt;&gt; Performing Cluster Check (using node 192.168.122.217:6379)
+M: 6343d46d255182e0e116dfad536028702e776251 192.168.122.217:6379
+   slots:5461-10922 (5462 slots) master
+   1 additional replica(s)
+M: c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379
+   slots:0-5460 (5461 slots) master
+   1 additional replica(s)
+S: c67e2adf957cb6f123103c677fb998135ca61a5b 192.168.122.112:6380
+   slots: (0 slots) slave
+   replicates 6343d46d255182e0e116dfad536028702e776251
+S: 28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380
+   slots: (0 slots) slave
+   replicates c18bae19c335c2bfad4c4628d562bd937bd608ec
+M: 3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379
+   slots:10923-16383 (5461 slots) master
+   1 additional replica(s)
+S: 5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380
+   slots: (0 slots) slave
+   replicates 3bde122a2d531d562f932657a67ae0461479cbd1
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+</code></pre>
+
+<h1>集群节点的增删以及分片(数据槽slot重新分配)</h1>
+<h2>删除集群节点</h2>
+<p><strong>1.删除从节点</strong>
+删除从节点直接删除就可以
+删除命令：redis-trib.rb del-node "del_slave_ip:port" "slave_node_id"
+比如</p>
+<pre class="codehilite"><code class="language-bash">./src/redis-trib.rb del-node 192.168.122.112:6380 c67e2adf957cb6f123103c677fb998135ca61a5b  #删除192.168.122.112:6380这个从节点
+&gt;&gt;&gt; Removing node c67e2adf957cb6f123103c677fb998135ca61a5b from cluster 192.168.122.112:6380
+Connecting to node 192.168.122.112:6380: OK
+Connecting to node 192.168.122.217:6380: OK
+Connecting to node 192.168.122.217:6379: OK
+Connecting to node 192.168.122.132:6379: OK
+Connecting to node 192.168.122.112:6379: OK
+Connecting to node 192.168.122.132:6380: OK
+&gt;&gt;&gt; Sending CLUSTER FORGET messages to the cluster...
+&gt;&gt;&gt; SHUTDOWN the node.
+</code></pre>
+
+<p><strong>2.删除主节点</strong></p>
+<p>主节点的删除分三步
+- 1.首先需要删除对应主节点的从节点，参考<code>删除从节点</code>
+- 2.移除主节点上的数据槽(分配的slot)
+    <code>bash
+    ./src/redis-trib.rb reshard 192.168.122.217:6379
+    ... #省略号表示省略无关内容
+    How many slots do you want to move (from 1 to 16384)? 16384         #被移除的数据槽,可根据cluster nodes 查看
+    ...
+    What is the receiving node ID? 28cca88d789477a1bae4abfbe20c187bb54583cf         #接收被删除节点数据的主节点
+    ...
+    Source node #1:6343d46d255182e0e116dfad536028702e776251 #被删除主节点的node-id  
+    Source node #2:done         #结束标志，开始执行
+    ...
+    Do you want to proceed with the proposed reshard plan (yes/no)? yes #删除要被删除节点的slot后，重新分配
+    [root@redis01 redis-3.0.4]# /usr/local/redis6379/bin/redis-cli -c -p 6379 cluster nodes     #查看节点信息
+    28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380 master - 0 1478593786321 7 connected 0-10922
+    6343d46d255182e0e116dfad536028702e776251 192.168.122.217:6379 myself,master - 0 0 1 connected       #此时要被删除的主节点的slot信息没有了
+    c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379 slave 28cca88d789477a1bae4abfbe20c187bb54583cf 0 1478593786823 7 connected
+    3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379 master - 0 1478593785820 3 connected 10923-16383
+    5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380 slave 3bde122a2d531d562f932657a67ae0461479cbd1 0 1478593787322 4 connected</code>
+- 3.删除主节点,参考<code>删除从节点</code></p>
+<h2>增加集群节点</h2>
+<p><strong>增加主集群节点</strong></p>
+<p>将上面测试删除节点时删除的节点从新加入集群</p>
+<pre class="codehilite"><code class="language-bash">./src/redis-trib.rb add-node 192.168.122.217:6379 192.168.122.217:6380
+&gt;&gt;&gt; Adding node 192.168.122.217:6379 to cluster 192.168.122.217:6380
+Connecting to node 192.168.122.217:6380: OK
+Connecting to node 192.168.122.132:6379: OK
+Connecting to node 192.168.122.112:6379: OK
+Connecting to node 192.168.122.132:6380: OK
+&gt;&gt;&gt; Performing Cluster Check (using node 192.168.122.217:6380)
+M: 28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380
+   slots:0-10922 (10923 slots) master
+   1 additional replica(s)
+M: 3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379
+   slots:10923-16383 (5461 slots) master
+   1 additional replica(s)
+S: c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379
+   slots: (0 slots) slave
+   replicates 28cca88d789477a1bae4abfbe20c187bb54583cf
+S: 5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380
+   slots: (0 slots) slave
+   replicates 3bde122a2d531d562f932657a67ae0461479cbd1
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+Connecting to node 192.168.122.217:6379: OK
+[ERR] Node 192.168.122.217:6379 is not empty. Either the node already knows other nodes (check with CLUSTER NODES) or contains some key in database 0.  #此处报错原因是因为前面测试删除节点，不是使用全新安装的redis服务,相关目录还保留残留文件,需手动删除
+#以下是解决办法
+[root@redis01 redis-3.0.4]# cd /data/redis/6379/
+[root@redis01 6379]# rm -rf nodes-6379.conf     #删除原有节点信息文件
+[root@redis01 redis-3.0.4]# service redis_6379 restart  #重启redis服务
+Stopping ...
+Waiting for Redis to shutdown ...
+Redis stopped
+Starting Redis server...
+
+##重新添加
+[root@redis01 redis-3.0.4]# ./src/redis-trib.rb add-node 192.168.122.217:6379 192.168.122.217:6380  #重新添加新节点
+&gt;&gt;&gt; Adding node 192.168.122.217:6379 to cluster 192.168.122.217:6380
+Connecting to node 192.168.122.217:6380: OK
+Connecting to node 192.168.122.132:6379: OK
+Connecting to node 192.168.122.112:6379: OK
+Connecting to node 192.168.122.132:6380: OK
+&gt;&gt;&gt; Performing Cluster Check (using node 192.168.122.217:6380)
+M: 28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380
+   slots:0-10922 (10923 slots) master
+   1 additional replica(s)
+M: 3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379
+   slots:10923-16383 (5461 slots) master
+   1 additional replica(s)
+S: c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379
+   slots: (0 slots) slave
+   replicates 28cca88d789477a1bae4abfbe20c187bb54583cf
+S: 5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380
+   slots: (0 slots) slave
+   replicates 3bde122a2d531d562f932657a67ae0461479cbd1
+[OK] All nodes agree about slots configuration.
+&gt;&gt;&gt; Check for open slots...
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+Connecting to node 192.168.122.217:6379: OK
+&gt;&gt;&gt; Send CLUSTER MEET to node 192.168.122.217:6379 to make it join the cluster.
+[OK] New node added correctly.
+
+
+[root@redis01 redis-3.0.4]# /usr/local/redis6379/bin/redis-cli -c -p 6380 cluster nodes            #查看集群节点信息
+3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379 master - 0 1478594694846 3 connected 10923-16383
+c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379 slave 28cca88d789477a1bae4abfbe20c187bb54583cf 0 1478594693844 7 connected
+e0fab3c8d591f84535c46841c16c9c287c6d73e2 192.168.122.217:6379 master - 0 1478594692841 0 connected  #发现添加成功
+28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380 myself,master - 0 0 7 connected 0-10922
+5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380 slave 3bde122a2d531d562f932657a67ae0461479cbd1 0 1478594693342 4 connected
+#添加成功的节点并没有真正在集群中使用，集群的slot槽需要重新分配
+
+
+[root@redis01 redis-3.0.4]# ./src/redis-trib.rb reshard 192.168.122.217:6379
+Connecting to node 192.168.122.217:6379: OK
+Connecting to node 192.168.122.217:6380: OK
+Connecting to node 192.168.122.112:6379: OK
+Connecting to node 192.168.122.132:6380: OK
+Connecting to node 192.168.122.132:6379: OK
+&gt;&gt;&gt; Performing Cluster Check (using node 192.168.122.217:6379)
+......      #s省略号表示省略无关信息
+&gt;&gt;&gt; Check slots coverage...
+[OK] All 16384 slots covered.
+How many slots do you want to move (from 1 to 16384)? 5600          #设置solt，设置每个节点的solt区间范围
+What is the receiving node ID? e0fab3c8d591f84535c46841c16c9c287c6d73e2 #此处填新添加的节点的nodeID
+Please enter all the source node IDs.
+  Type 'all' to use all the nodes as source nodes for the hash slots.
+  Type 'done' once you entered all the source nodes IDs.
+Source node #1:all #表示全部重新分配
+....
+Do you want to proceed with the proposed reshard plan (yes/no)? yes     #确认重启分配
+
+
+[root@redis01 redis-3.0.4]# /usr/local/redis6379/bin/redis-cli -c -p 6380 cluster nodes #查看节点信息，发现新添加的主节点也有slot
+3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379 master - 0 1478595533541 9 connected 1914-5599
+c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379 slave 28cca88d789477a1bae4abfbe20c187bb54583cf 0 1478595533041 10 connected
+e0fab3c8d591f84535c46841c16c9c287c6d73e2 192.168.122.217:6379 master - 0 1478595533541 8 connected 9286-16383
+28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380 myself,master - 0 0 10 connected 0-1913 5600-9285
+5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380 slave 3bde122a2d531d562f932657a67ae0461479cbd1 0 1478595532539 9 connected
+</code></pre>
+
+<p><strong>增加从集群节点</strong></p>
+<pre class="codehilite"><code class="language-bash">#添加从节点
+命令参考:redis-trib.rb add-node --slave --master-id &quot;master_node_id&quot; &quot;new_slave&quot; &quot;集群已有任一集群节点&quot;
+[root@redis01 redis-3.0.4]# redis-trib.rb add-node --slave --master-id e0fab3c8d591f84535c46841c16c9c287c6d73e2 192.168.122.112:6380 192.168.122.132:6380
+
+[root@redis01 redis-3.0.4]# /usr/local/redis6379/bin/redis-cli -c -p 6380 cluster nodes     #查看节点信息
+c67e2adf957cb6f123103c677fb998135ca61a5b :0 slave,noaddr e0fab3c8d591f84535c46841c16c9c287c6d73e2 1478596060068 1478596057963 8 disconnected
+3bde122a2d531d562f932657a67ae0461479cbd1 192.168.122.132:6379 master - 0 1478596780704 9 connected 1914-5599
+400667d62c9dd1581f5c5161d9d52b91e1ee137d 192.168.122.112:6380 slave e0fab3c8d591f84535c46841c16c9c287c6d73e2 0 1478596781206 8 connected    #添加从节点成功
+c18bae19c335c2bfad4c4628d562bd937bd608ec 192.168.122.112:6379 slave 28cca88d789477a1bae4abfbe20c187bb54583cf 0 1478596781706 10 connected
+e0fab3c8d591f84535c46841c16c9c287c6d73e2 192.168.122.217:6379 master - 0 1478596780203 8 connected 9286-16383
+28cca88d789477a1bae4abfbe20c187bb54583cf 192.168.122.217:6380 myself,master - 0 0 10 connected 0-1913 5600-9285
+5f25c4e5e0891530e54570f51cf9de8015c08d9e 192.168.122.132:6380 slave 3bde122a2d531d562f932657a67ae0461479cbd1 0 1478596780203 9 connected
+</code></pre>
+
+<h2>设置集群密码</h2>
+<p>如果要提高集群的安全性，可以使用如下命令设置密码</p>
+<pre class="codehilite"><code class="language-bash">config set masterauth abc  
+config set requirepass abc  
+config rewrite 
+</code></pre>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

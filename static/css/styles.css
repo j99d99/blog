@@ -139,7 +139,7 @@ img {
     display: flex;
 }
 
-.content-list span {
+.content-list div {
     display: inline-flex;
     align-items: center;
 }

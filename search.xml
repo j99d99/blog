@@ -1,2 +1,525 @@
 <?xml version='1.0' encoding='utf-8'?>
-<search />
+<search><item><title>为啥要从头搞一个博客</title><description>&lt;p&gt;&lt;strong&gt;为什么产生这个想法&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;其实，之前也有弄过个人博客站点，主要是想用来记录平时工作的一些文档，但最后终究是为了搭建而搭建，最开始使用的wordpress这种带后台的建站工具，但是个人不是很喜欢在后台编辑器里面写文章，最后不了了之，再之后又使用hexo这种静态博客生成工具,直接将自己本地的md格式文档直接生成静态博客，从这个角度来说确实挺适合我这种，但</description><html_content>&lt;p&gt;&lt;strong&gt;为什么产生这个想法&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;其实，之前也有弄过个人博客站点，主要是想用来记录平时工作的一些文档，但最后终究是为了搭建而搭建，最开始使用的wordpress这种带后台的建站工具，但是个人不是很喜欢在后台编辑器里面写文章，最后不了了之，再之后又使用hexo这种静态博客生成工具,直接将自己本地的md格式文档直接生成静态博客，从这个角度来说确实挺适合我这种，但是一直都没有找到一个自己觉得满意的主题，最后依旧作罢。最近又萌生了搭建博客的想法，结合前面两次的经验，想想还是自己写一个，以后如果有调整样式也更得心应手些。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;博客的产生&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;规划&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;由于平时的文档都是使用md格式写的，所以打算直接将md文档进行解析来生成博客。但是考虑到平时文档存放基本是在一个目录内无序存放，可能在某个子文件夹内，也可能在根目录下，所以不打算使用子文件夹来做分类目录，所有需要的“分类”、“标签”、“时间”等信息都放在markdown文档的&lt;code&gt;Front Matter&lt;/code&gt;里面。这也是唯一的格式要求(主要考虑博客的分类和标签功能)&lt;/p&gt;
+&lt;p&gt;下面是一个参考示例，写作markdown文档的最开头处&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code&gt;---
+title: Front Matter示例，写在markdown文档的最开头处
+date: 2024-11-15
+categories: web建站
+tags: ['个人博客']
+---
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;主要功能分析与实现&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;首先考虑如何将markdown文档的YAML Front Matter部分和内容部分分离&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;首先检查内容是否以 &lt;code&gt;---&lt;/code&gt; 开头，这是 YAML Front Matter 的标准标识符。如果是，它会在内容的第三个字符后(排除第一个&lt;code&gt;---&lt;/code&gt; )找到第二个 &lt;code&gt;---&lt;/code&gt;，从而确定 Front Matter 的结束位置。然后，它提取 &lt;code&gt;---&lt;/code&gt; 之间的部分作为 YAML 数据，并将其解析为字典。最后，它将 YAML Front Matter 部分提取出来，使用 &lt;code&gt;PyYAML&lt;/code&gt; 库的 &lt;code&gt;safe_load&lt;/code&gt; 函数将 &lt;code&gt;front_matter&lt;/code&gt; 部分解析为 Python 字典。&lt;code&gt;safe_load&lt;/code&gt; 是一个安全的解析方法，它能防止执行可能有害的 YAML 内容，&lt;code&gt;yaml.safe_load(front_matter)&lt;/code&gt; 返回解析后的字典和剩余的正文内容。如果没有找到有效的 Front Matter，函数会返回一个空字典和原始内容，功能实现函数如下&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;import yaml
+
+def parse_front_matter(content):
+    &amp;quot;&amp;quot;&amp;quot;
+    content参数为读取的markdown文件原始内容
+    解析 YAML Front Matter，分离Front Matter与内容部分(body)
+    &amp;quot;&amp;quot;&amp;quot;
+    if content.startswith('---'):
+        end_index = content.find('---', 3)
+        if end_index != -1:
+            front_matter = content[3:end_index]
+            body = content[end_index + 3:]
+            #返回front matter信息和内容
+            return yaml.safe_load(front_matter), body 
+    #没有front matter信息则返回空字典和内容
+    return {}, content 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;考虑内容部分的格式转换，转换成html格式进行渲染&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;依赖&lt;code&gt;markdown&lt;/code&gt;库，使用&lt;code&gt;markdown.markdown()&lt;/code&gt; 函数，将 Markdown 格式的文本转换为 HTML。这个函数接受多个参数，其中第一个是要转换的 Markdown 内容（&lt;code&gt;md_content&lt;/code&gt;），第二个是一个扩展列表（&lt;code&gt;extensions=extensions&lt;/code&gt;），用来启用特定的 Markdown 扩展。&lt;code&gt;CodeHiliteExtension&lt;/code&gt;扩展为代码块提供语法高亮。&lt;code&gt;FencedCodeExtension&lt;/code&gt;扩展支持使用围栏代码块语法（即用 ````` 包裹的代码块）。&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;import markdown
+from markdown.extensions.codehilite import CodeHiliteExtension
+from markdown.extensions.fenced_code import FencedCodeExtension
+
+def convert_markdown_to_html(md_content):
+    &amp;quot;&amp;quot;&amp;quot;将 Markdown 内容转换为 HTML&amp;quot;&amp;quot;&amp;quot;
+    extensions = [CodeHiliteExtension(), FencedCodeExtension()]
+    return markdown.markdown(md_content, extensions=extensions)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;遍历文档目录，收集文章信息数据&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;有了前面的两步，现在可以成功的将一个markdown文档里的数据进行拆分了，这样就可以将目录内的所有文档的数据提取出来组合成一个文档数据的列表，方便后续其他渲染函数使用，这里我组合了三种数据，posts收集文章信息数据(包括标题、其它元素据、文章内容)，tags收集元数据里的标签信息，categories收集分类信息，实现函数如下:&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;# 配置目录
+POSTS_DIR = 'posts'
+OUTPUT_DIR = 'output'
+
+def get_by_metadata_process_posts():
+    '''
+    获取文章信息
+    包括文章、标签、分类
+    '''
+    if not os.path.exists(OUTPUT_DIR):
+        os.makedirs(OUTPUT_DIR)
+
+    tags = {}
+    categories = {}
+    posts = []
+
+    for root, dirs, files in os.walk(POSTS_DIR):
+        for filename in files:
+            if filename.endswith('.md'):
+                file_path = os.path.join(root, filename)
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    content = file.read()
+                    metadata, body = parse_front_matter(content)
+                    title = metadata.get('title', filename.replace('.md', ''))
+                    html_content = convert_markdown_to_html(body)
+
+                    # 收集文章信息
+                    posts.append({'title': title, 'html_content': html_content, 'metadata': metadata})
+
+                    # 更新标签
+                    for tag in metadata.get('tags', []):
+                        tags.setdefault(tag, []).append(title)
+
+                    # 获取子目录作为分类
+                    categories.setdefault(metadata.get('category', '未分类'), []).append(title)
+                    #category = os.path.basename(root)  # 获取当前目录的名称
+                    #categories.setdefault(category, []).append(title)
+
+                    # 获取一级子目录作为分类
+                    # relative_path = os.path.relpath(root, POSTS_DIR)  # 获取相对路径
+                    # category = relative_path.split(os.sep)[0]  # 获取一级子目录
+                    # categories.setdefault(category, []).append(title)
+    # 生成 search.xml 文件,后续搜索功能需要使用
+    generate_search_xml(posts)
+    return posts, tags, categories
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;使用jinja2模板渲染生成html文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;渲染生成html文件之前，创建一个html模板,这里介绍首页的生成，新建一个templates目录存放所有的模板文件，template/index.html为首页模板文件,下面是我的首页模板文件&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-html"&gt;{% extends &amp;quot;base.html&amp;quot; %}
+
+{% block title %}各自花开{% endblock %}
+
+
+{% block banner%}
+    &amp;lt;div class=&amp;quot;banner container banner-content&amp;quot;&amp;gt;
+        &amp;lt;div&amp;gt;
+            &amp;lt;div class=&amp;quot;photo-wall&amp;quot;&amp;gt;
+                &amp;lt;div class=&amp;quot;photo-item&amp;quot;&amp;gt;
+                    &amp;lt;span class=&amp;quot;photo-text&amp;quot;&amp;gt;各&amp;lt;/span&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;div class=&amp;quot;photo-item&amp;quot;&amp;gt;
+                    &amp;lt;span class=&amp;quot;photo-text&amp;quot;&amp;gt;自&amp;lt;/span&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;div class=&amp;quot;photo-item&amp;quot;&amp;gt;
+                    &amp;lt;span class=&amp;quot;photo-text&amp;quot;&amp;gt;花&amp;lt;/span&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;div class=&amp;quot;photo-item&amp;quot;&amp;gt;
+                    &amp;lt;span class=&amp;quot;photo-text&amp;quot;&amp;gt;开&amp;lt;/span&amp;gt;
+                &amp;lt;/div&amp;gt;
+                &amp;lt;!-- Add more photo items as needed --&amp;gt;
+            &amp;lt;/div&amp;gt;
+
+        &amp;lt;/div&amp;gt;
+        &amp;lt;div&amp;gt;
+            &amp;lt;h1&amp;gt;凡事需三思,谨言慎行&amp;lt;/h1&amp;gt;
+            &amp;lt;p&amp;gt;对世界有看法，对生活有态度，让花成花，让树成树，认可任何一种观点和习惯&amp;lt;/p&amp;gt;
+        &amp;lt;/div&amp;gt;
+
+    &amp;lt;/div&amp;gt;
+{% endblock %}
+
+{% block content %}
+    &amp;lt;div class=&amp;quot;content&amp;quot;&amp;gt;
+        &amp;lt;h3&amp;gt;最近更新 &amp;lt;span class=&amp;quot;new-icon&amp;quot;&amp;gt;New&amp;lt;/span&amp;gt;&amp;lt;/h3&amp;gt;
+        &amp;lt;ul&amp;gt;
+        {% if contents %}
+            &amp;lt;div class=&amp;quot;content-list&amp;quot;&amp;gt;
+                {% for content in contents %}
+                    &amp;lt;span&amp;gt;
+                        &amp;lt;img src=&amp;quot;../static/img/文字_text.png&amp;quot; class=&amp;quot;content-icon&amp;quot;&amp;gt;
+                        &amp;lt;li&amp;gt;&amp;lt;a href=&amp;quot;article/{{ content[&amp;quot;title&amp;quot;] }}.html&amp;quot;&amp;gt;{{ content[&amp;quot;title&amp;quot;] }}&amp;lt;/a&amp;gt; {{ content[&amp;quot;metadata&amp;quot;][&amp;quot;date&amp;quot;] }}&amp;lt;/li&amp;gt;
+                    &amp;lt;/span&amp;gt;
+                {% endfor %}
+            &amp;lt;/div&amp;gt;
+        {% endif %}
+
+        &amp;lt;/ul&amp;gt;
+    &amp;lt;/div&amp;gt;
+{% endblock %}
+
+
+{% block sidebar %}
+    &amp;lt;aside class=&amp;quot;sidebar&amp;quot;&amp;gt;
+
+        &amp;lt;!-- 作者介绍 --&amp;gt;
+    &amp;lt;div class=&amp;quot;sidebar-section author-intro&amp;quot;&amp;gt;
+        &amp;lt;h3&amp;gt;关于作者&amp;lt;/h3&amp;gt;
+        &amp;lt;div class=&amp;quot;author-info&amp;quot;&amp;gt;
+            &amp;lt;p&amp;gt;一个内心有想法但却随性，期望改变但最终随遇而安的矛盾存在&amp;lt;/p&amp;gt;
+            &amp;lt;p&amp;gt;博客文章同步更新微信公众号【各自花开】，期待您的关注~&amp;lt;/p&amp;gt;
+            &amp;lt;img src=&amp;quot;../static/img/qrcode_1280.jpg&amp;quot; alt=&amp;quot;作者头像&amp;quot; class=&amp;quot;author-avatar&amp;quot;&amp;gt;
+        &amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;!-- 热门标签 --&amp;gt;
+    &amp;lt;div class=&amp;quot;sidebar-section tags&amp;quot;&amp;gt;
+        &amp;lt;h3&amp;gt;热门标签&amp;lt;/h3&amp;gt;
+        &amp;lt;ul class=&amp;quot;tag-list&amp;quot;&amp;gt;
+            {% for tag in tags %}
+                &amp;lt;li&amp;gt;&amp;lt;a href=&amp;quot;./tags/{{ tag }}.html&amp;quot;&amp;gt;{{ tag }}&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;
+            {% endfor %}
+        &amp;lt;/ul&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+    &amp;lt;!-- 推荐文章 --&amp;gt;
+    &amp;lt;div class=&amp;quot;sidebar-section recommended&amp;quot;&amp;gt;
+        &amp;lt;h3&amp;gt;分类&amp;lt;/h3&amp;gt;
+        &amp;lt;ul class=&amp;quot;recommended-list&amp;quot;&amp;gt;
+            {% for category in categories %}
+                &amp;lt;li&amp;gt;&amp;lt;a href=&amp;quot;./categories/{{ category }}.html&amp;quot;&amp;gt;{{ category }}&amp;lt;/a&amp;gt;&amp;lt;/li&amp;gt;
+            {% endfor %}
+        &amp;lt;/ul&amp;gt;
+    &amp;lt;/div&amp;gt;
+
+&amp;lt;/aside&amp;gt;
+
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;首页渲染函数，执行该函数会在OUTPUT_DIR目录下生成一个首页index.html文件&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;# 设置模板文件夹路径
+template_dir = 'templates'
+# 创建一个模板加载器
+loader = FileSystemLoader(template_dir)
+# 创建 Jinja2 环境
+env = Environment(loader=loader)
+
+def generate_index_page(posts,tags=None,categories=None):
+    &amp;quot;&amp;quot;&amp;quot;生成首页&amp;quot;&amp;quot;&amp;quot;
+    # 加载模板
+    index_template = env.get_template('index.html')
+
+    # 默认值为空列表
+    if tags is None:
+        tags = []
+
+    if categories is None:
+        categories = []
+
+    # posts[:5] 显示5条
+    html = index_template.render(contents=posts,tags=tags, categories=categories)
+    output_file = os.path.join(OUTPUT_DIR, 'index.html')
+    with open(output_file, 'w', encoding='utf-8') as file:
+        file.write(html)
+    print(f&amp;quot;Generated {output_file}&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;其它页面比如文章页、标签页等参照首页的生成方式去渲染，当所有页面都渲染生成之后，就可以部署了，这样我的博客就建成了，最后给大家展示一下我自己写的博客吧&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Blog_Demo" src="http://nas.izcat.com:9001/webpic/Blog_Demo.gif" /&gt;&lt;/p&gt;</html_content></item><item><title>博客的搜索功能是怎么实现的</title><description>&lt;p&gt;之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;思路&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假设我们有一个&lt;code&gt;posts&lt;/code&gt; 的包含所有文章信息的列表，</description><html_content>&lt;p&gt;之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;思路&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假设我们有一个&lt;code&gt;posts&lt;/code&gt; 的包含所有文章信息的列表， 通过&lt;code&gt;generate_search_xml&lt;/code&gt;函数处理传入的&lt;code&gt;posts&lt;/code&gt;参数，将文章的标题、内容等信息写入一个&lt;code&gt;search.xml&lt;/code&gt;文件内，后续在通过搜索页面对该文件内容进行搜索实现搜索展示。这里涉及到两个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;search.xml&lt;/code&gt;文件的生成，由&lt;code&gt;generate_search_xml&lt;/code&gt;函数实现&lt;/li&gt;
+&lt;li&gt;搜索页面对&lt;code&gt;search.xml&lt;/code&gt;文件进行搜索，并展示搜索结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;generate_search_xml&lt;/code&gt;函数实现&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;import xml.etree.ElementTree as ET
+def generate_search_xml(posts):
+    &amp;quot;&amp;quot;&amp;quot;根据文章信息生成 search.xml&amp;quot;&amp;quot;&amp;quot;
+    search_xml = ET.Element('search')
+
+    for post in posts:
+        title = post['title']
+        html_content = post['html_content']
+        metadata = post['metadata']
+
+        # 生成描述，提取文章正文的前200个字符作为描述
+        description = html_content[:200].strip()  # 提取内容的前200个字符作为描述
+        if len(description) == 200 and html_content[200] not in [' ', '&amp;lt;']:  # 防止截断在单词或标签中间
+            description = description.rsplit(' ', 1)[0]
+
+        item = ET.SubElement(search_xml, 'item')
+        title_elem = ET.SubElement(item, 'title')
+        title_elem.text = title
+        description_elem = ET.SubElement(item, 'description')
+        description_elem.text = description
+        # metadata_elem = ET.SubElement(item, 'metadata')
+        # metadata_elem.text = metadata
+        html_content_elem = ET.SubElement(item, 'html_content')
+        html_content_elem.text = html_content
+
+    # 写入到 search.xml 文件
+    tree = ET.ElementTree(search_xml)
+    output_path = os.path.join(OUTPUT_DIR, 'search.xml')
+    tree.write(output_path, encoding='utf-8', xml_declaration=True)
+    # print(f&amp;quot;search.xml 文件已保存至 {output_path}&amp;quot;)
+    print(f&amp;quot;Generated {search_xml}&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面这个函数，将每篇文章的信息以&lt;code&gt;&amp;lt;item&amp;gt;&lt;/code&gt;元素添加到&lt;code&gt;search.xml&lt;/code&gt;文件的根元素&lt;code&gt;&amp;lt;search&amp;gt;&lt;/code&gt;当中，每个 &lt;code&gt;&amp;lt;item&amp;gt;&lt;/code&gt; (也就是每篇文章)包含：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;title&amp;gt;&lt;/code&gt;: 文章标题&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;description&amp;gt;&lt;/code&gt;: 文章描述（前200个字符）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;html_content&amp;gt;&lt;/code&gt;: 文章的完整 HTML 内容&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;搜索页面的实现&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;首先通过&lt;code&gt;loadXML()&lt;/code&gt;函数加载&lt;code&gt;search.xml&lt;/code&gt;文件到&lt;code&gt;searchData&lt;/code&gt;列表，然后通过&lt;code&gt;id="search-input"&lt;/code&gt;获取搜索关键字&lt;code&gt;query&lt;/code&gt;，通过方法&lt;code&gt;filter&lt;/code&gt;查找包含关键字&lt;code&gt;query&lt;/code&gt;的内容。最后对查找结果使用&lt;code&gt;displayResults&lt;/code&gt;方法进行生成展示&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;搜索页模板&lt;code&gt;search.html&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-html"&gt;{% extends &amp;quot;base.html&amp;quot; %}
+
+{% block title %}搜索页面{% endblock %}
+
+{% block content %}
+    &amp;lt;!-- 页面主要内容 --&amp;gt;
+    &amp;lt;div class=&amp;quot;search-box content&amp;quot;&amp;gt;
+{#        &amp;lt;h1&amp;gt;搜索页面&amp;lt;/h1&amp;gt;#}
+
+        &amp;lt;div id=&amp;quot;search-container&amp;quot;&amp;gt;
+            &amp;lt;img src=&amp;quot;../static/img/搜索_search.png&amp;quot; alt=&amp;quot;Search Icon&amp;quot; class=&amp;quot;search-icon&amp;quot;&amp;gt; &amp;lt;!-- 这里是你的搜索图标图片路径 --&amp;gt;
+            &amp;lt;input type=&amp;quot;text&amp;quot; id=&amp;quot;search-input&amp;quot; placeholder=&amp;quot;请输入搜索关键字&amp;quot; oninput=&amp;quot;search()&amp;quot;&amp;gt;
+        &amp;lt;/div&amp;gt;
+
+        &amp;lt;div id=&amp;quot;search-results&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+    &amp;lt;script&amp;gt;
+        // 初始化变量
+        let searchData = [];
+
+        // 加载 search.xml 数据
+        function loadXML() {
+            fetch('search.xml')
+                .then(response =&amp;gt; response.text())
+                .then(data =&amp;gt; {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, 'text/xml');
+                    const items = xmlDoc.getElementsByTagName('item');
+                    searchData = [];
+
+                    for (let i = 0; i &amp;lt; items.length; i++) {
+                        let title = items[i].getElementsByTagName('title')[0].textContent;
+                        let description = items[i].getElementsByTagName('description')[0].textContent;
+                        let html_content = items[i].getElementsByTagName('html_content')[0].textContent;
+                        searchData.push({ title, description,html_content });
+                    }
+                })
+                .catch(error =&amp;gt; console.error('加载 XML 数据失败:', error));
+        }
+
+        function search() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+
+            // 如果搜索框为空，清空结果并返回
+            if (query === '') {
+                document.getElementById('search-results').innerHTML = ''; // 清空搜索结果
+                return;
+            }
+
+            // 如果有搜索内容，执行搜索操作
+            const results = searchData.filter(item =&amp;gt;
+                item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query) || item.html_content.toLowerCase().includes(query)
+            );
+            displayResults(query,results);
+        }
+
+        // 显示搜索结果
+        function displayResults(query,results) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '&amp;lt;p&amp;gt;没有找到相关结果&amp;lt;/p&amp;gt;';
+                return;
+            }
+
+            results.forEach(item =&amp;gt; {
+                const resultTitle = document.createElement('h1');
+                resultTitle.innerHTML=`包含关键字&amp;lt;span class=&amp;quot;query-color&amp;quot;&amp;gt;${query}&amp;lt;/span&amp;gt;的文章:`;
+                resultsContainer.appendChild(resultTitle);
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    &amp;lt;div class=&amp;quot;result-title&amp;quot;&amp;gt;
+                            &amp;lt;img src=&amp;quot;../static/img/文字_text.png&amp;quot;&amp;gt;
+                            &amp;lt;a href=&amp;quot;article/${item.title}.html&amp;quot;&amp;gt;${item.title}&amp;lt;/a&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                    &amp;lt;div class=&amp;quot;result-description&amp;quot;&amp;gt;${item.description}&amp;lt;/div&amp;gt;
+                `;
+                resultsContainer.appendChild(resultItem);
+            });
+        }
+
+        // 初始化时加载 XML 数据
+        window.onload = loadXML;
+    &amp;lt;/script&amp;gt;
+
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;搜索页面渲染函数实现&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;def generate_search_pages():
+    &amp;quot;&amp;quot;&amp;quot; 根据search_template 生成搜索页面&amp;quot;&amp;quot;&amp;quot;
+    search_template = env.get_template('search.html')
+    search_output_file = os.path.join(OUTPUT_DIR, f&amp;quot;search.html&amp;quot;)
+    # 创建目录（如果不存在）
+    # os.makedirs(os.path.dirname(share_output_file), exist_ok=True)
+    with open(search_output_file, 'w', encoding='utf-8') as file:
+        file.write(search_template.render())
+    print(f&amp;quot;Generated {search_output_file}&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样搜索功能就完成了。&lt;/p&gt;</html_content></item><item><title>Typora结合PicGo使用minio插件搭建个人图床上传图片</title><description>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;我们在平时写文章或者博客的时候，经常使用markdown格式来编写，而Typora就是一款Markdown编辑器被大家使用，但是我们在写作过程当中经常需要插入图片，由于图片保存在本地，插入到文章之后引用的也是本地地址导致我们写好的文章发布出去的时候图片无法被加载。所以我们需要一个专门的地方来存放这些图片，而这个地方就叫图床，像微信公众号</description><html_content>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;我们在平时写文章或者博客的时候，经常使用markdown格式来编写，而Typora就是一款Markdown编辑器被大家使用，但是我们在写作过程当中经常需要插入图片，由于图片保存在本地，插入到文章之后引用的也是本地地址导致我们写好的文章发布出去的时候图片无法被加载。所以我们需要一个专门的地方来存放这些图片，而这个地方就叫图床，像微信公众号等大厂家的写作平台都自带图床，写作的时候我们把图片上传之后在插入到平台的写作编辑器里即可，对于我们本地写作的话也可以实现这样的功能，就是需要自建图床,本文我们介绍使用minio来搭建一个图床，然后借助PicGO这款软件，我们在Typora里面配置PicGo之后，当我们插入图片之后，会自动把图片上传到minio图床内，并将Typora编辑器内的图片地址修改成图床图片的访问地址，这样当我们文章写好发布出去的时候就不用担心图片无法加载了&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;涉及的软件&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Typora&lt;/li&gt;
+&lt;li&gt;minio&lt;/li&gt;
+&lt;li&gt;PicGO&lt;/li&gt;
+&lt;li&gt;NodeJs（PicGo安装需要）&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;开始动起来吧&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;一、使用minio搭建对象存储&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. 什么是minio&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;minio是一个高性能的对象存储服务，支持分布式存储，具有高扩展性、高可用性，部署方式多样，部署简单，官方有详细的&lt;a href="https://min.io/docs/minio/container/index.html"&gt;安装文档&lt;/a&gt;可参考&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. 使用docker部署minio&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;minio的安装方式很多，我们这里选择使用docker部署&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-bash"&gt;docker run \
+-p 9000:9000 \
+-p 9001:9001 \
+--name minio \
+-d --restart=always \
+-e &amp;quot;MINIO_ROOT_USER=admin&amp;quot; \
+-e &amp;quot;MINIO_ROOT_PASSWORD=passwd&amp;quot; \
+-v /volume1/docker/minio/data:/data \
+-v /volume1/docker/minio/config:/root/.minio \
+minio/minio server /data --console-address &amp;quot;:9001&amp;quot; 
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;3. 登录minio服务web控制台创建bucket以及accessKey和secretKey&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;创建bucket并配置匿名访问权限为&lt;code&gt;readonly&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;点击&lt;code&gt;Buckets&lt;/code&gt;-&amp;gt;点击右上角的&lt;code&gt;Create Buckes&lt;/code&gt; -&amp;gt;然后在&lt;code&gt;Create Bucket&lt;/code&gt;页面输入&lt;code&gt;Bucket Name&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_15-59-43" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_15-59-43_repeat_1730275414950__230387.png" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-00-34" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-00-34_repeat_1730275405309__649124.png" /&gt;&lt;/p&gt;
+&lt;p&gt;设置创建的Bucket的匿名访问为&lt;code&gt;radonly&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-02-05" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-02-05_repeat_1730275373013__439525.png" /&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;创建&lt;code&gt;accessKey&lt;/code&gt;和&lt;code&gt;secretKey&lt;/code&gt;并记录下来，在后面&lt;code&gt;PicGo&lt;/code&gt;配置插件minio插件时需要使用&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-17-01" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-17-01_repeat_1730276261677__986201.png" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;二、安装PicGo，配置minio插件&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;1. PicGo介绍&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;PicGO是一个用于快速上传图片并获取图片URL链接的工具，&lt;a href="https://molunerfinn.com/PicGo/"&gt;PicGO官网&lt;/a&gt; 下载安装即可，需要注意的是这款软件的安装依赖&lt;code&gt;Nodejs&lt;/code&gt;,所以需要先安装NodeJs环境。&lt;/p&gt;
+&lt;p&gt;软件安装比较简单，这里就不介绍&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;2. PicGo安装配置minio插件&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;minio插件全称&lt;code&gt;picgo-plugin-minio&lt;/code&gt;，可以在它的&lt;a href="https://github.com/Herbertzz/picgo-plugin-minio"&gt;官网&lt;/a&gt;查看更多信息，安装好&lt;code&gt;PicGo&lt;/code&gt;软件之后在软件的&lt;code&gt;插件设置&lt;/code&gt;界面输入关键字&lt;code&gt;minio&lt;/code&gt;搜索插件，然后点击安装即可，安装完成会显示已安装，然后在&lt;code&gt;图床设置&lt;/code&gt; 选项里面可以看到多出一个&lt;code&gt;minio 图床&lt;/code&gt;选项&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-30-44" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-30-44_repeat_1730277107674__930034.png" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-32-37" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-32-37_repeat_1730277196695__724948.png" /&gt;&lt;/p&gt;
+&lt;p&gt;PicGo配置minio图床，具体的使用以及参数说明可以参考&lt;a href="https://github.com/Herbertzz/picgo-plugin-minio"&gt;picgo-plugin-minio&lt;/a&gt;插件的官方说明&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-35-51" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-35-51_repeat_1730277419862__276891.png" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;三、安装Typora并配置PicGo自动上传&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;Typora的安装没有什么好说明的，需要注意的是这款软件是以前是不收费的，后来改成收费软件了，觉得好用可以支持一下正版，这里主要说说Typora如何配置PicGo来实现图片自动上传的&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;文件&lt;/code&gt;-&amp;gt;&lt;code&gt;偏好设置&lt;/code&gt;-&amp;gt;&lt;code&gt;图像&lt;/code&gt;进行设置&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;插入图片时&lt;/code&gt;选项设置成上传图片&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;code&gt;上传服务设定&lt;/code&gt;选项进行picgo服务相关设置&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;img alt="" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_17-01-56_repeat_1730278931812__477406.png" /&gt;&lt;/p&gt;
+&lt;p&gt;配置完成可以点击&lt;code&gt;验证图片上传选项&lt;/code&gt;进行验证&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-48-40" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-48-40_repeat_1730278609242__941936.png" /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;总结&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;回顾整个配置过程并不复杂，需要注意PicGo安装minio插件的时候，我开始点击安装很多次都安装不上，最后怀疑是个人网络问题导致，开了科学上网之后安装成功，碰到类似问题的可以参考处理一下。&lt;/p&gt;</html_content></item><item><title>切换到python虚拟环境时报错'无法加载文件Activate.ps1，因为在此系统上禁止运行脚本'解决办法</title><description>&lt;p&gt;&lt;strong&gt;问题描述&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在windows的PowerShell或者Pycharm切换到python虚拟环境时报错“无法加载文件.\myenv\Scripts\Activate.ps1，因为在此系统上禁止运行脚本”&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;处理办法&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;管理员身份运行PowerShell&lt;/p&gt;
+&lt;/li&gt;</description><html_content>&lt;p&gt;&lt;strong&gt;问题描述&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在windows的PowerShell或者Pycharm切换到python虚拟环境时报错“无法加载文件.\myenv\Scripts\Activate.ps1，因为在此系统上禁止运行脚本”&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;处理办法&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;管理员身份运行PowerShell&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在PowerShell里执行通过执行 &lt;code&gt;Get-ExecutionPolicy&lt;/code&gt; 查看当前策略和执行&lt;code&gt;Set-ExecutionPolicy Bypass&lt;/code&gt;修改当前策略为&lt;code&gt;Bypass&lt;/code&gt;即可&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-powershell"&gt;PS C:\Windows\system32&amp;gt; Get-ExecutionPolicy
+Restricted
+PS C:\Windows\system32&amp;gt; Set-ExecutionPolicy Bypass
+
+执行策略更改
+执行策略可帮助你防止执行不信任的脚本。更改执行策略可能会产生安全风险，如 https:/go.microsoft.com/fwlink/?LinkID=135170
+中的 about_Execution_Policies 帮助主题所述。是否要更改执行策略?
+[Y] 是(Y)  [A] 全是(A)  [N] 否(N)  [L] 全否(L)  [S] 暂停(S)  [?] 帮助 (默认值为“N”): y
+PS C:\Windows\system32&amp;gt; Get-ExecutionPolicy
+Bypass
+PS C:\Windows\system32&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;</html_content></item><item><title>使用ddns-go实现家庭网络ddns域名动态解析</title><description>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;很多家庭都会有nas设备来存放个人资料、剧集。或者小型miniPc来当服务器使用的情况，由于放在家庭内网外部无法直接访问到，当然想要实现外部访问的话，方案肯定是有的，如今实现这个需求使用较多的方案个人认为就是内网穿透和域名动态解析(ddns)了，使用内网穿透需要借助公网服务器,也就是需要花钱采购公网服务器，这个是需要投入资金成本的，而今天</description><html_content>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;很多家庭都会有nas设备来存放个人资料、剧集。或者小型miniPc来当服务器使用的情况，由于放在家庭内网外部无法直接访问到，当然想要实现外部访问的话，方案肯定是有的，如今实现这个需求使用较多的方案个人认为就是内网穿透和域名动态解析(ddns)了，使用内网穿透需要借助公网服务器,也就是需要花钱采购公网服务器，这个是需要投入资金成本的，而今天给大家介绍的是域名动态解析的方案，这种方案不需要投入资金成本，只需要更改家庭带宽的拨号方式为桥架模式即可，以我家使用的中国电信为例，默认使用的是路由模式，宽带安装好之后即可使用，不需要路由器拨号，是没有公网IP的，电话客服让其更改为桥接模式并开通公网IP，然后通过路由器拨号上网的方式即可获取公网IP，这样使用ddns的前提条件就满足啦。其实很多路由器都有ddns的功能，但是很多都是自带需要注册第三方服务使用它们提供的子域名的那些，我不太喜欢使用，所以打算自己部署&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;不是改成了桥接模式就一定会有公网IP的，本人刚开通的时候确实有公网IP，使用一段时间之后的某一天突然无法使用了。排查了好久，发现实际查询的公网IP和PPOE拨号获取的IP地址不一样，让电信排查之后，告知没有开通公网IP。也是很无语，估计是被他们偷偷的关闭掉了，让其再次开通后一切又正常了&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&lt;strong&gt;方案实现&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;经过一翻资料查阅，发现&lt;code&gt;ddns-go&lt;/code&gt;挺不错，支持的域名服务商很多，部署支持Mac、Windows、Linux系统，支持ARM、x86架构。部署方便，还支持docker。我有一台黑群晖设备放在家里的，平时在公司也有访问它的需求，正好借助群晖的docker容器的方式部署。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;镜像地址&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;code&gt;https://hub.docker.com/r/jeessy/ddns-go&lt;/code&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;部署&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;在镜像地址页有详细的部署方式，我选的是不使用&lt;code&gt;host模式&lt;/code&gt;的运行方式,根据自己的需求自行选择即可&lt;/p&gt;
+&lt;p&gt;```bash
+   docker run -d --name ddns-go --restart=always -p 9876:9876 -v /volume1/docker/ddns-go:/root jeessy/ddns-go&lt;/p&gt;
+&lt;p&gt;```&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;配置aliddns&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;配置aliddns也很方便，部署完成之后，在浏览器打开ddns-go管理界面进行配置。登陆时需要输入账号密码，首次输入时随意，会自动创建，后续使用这个账号密码登录&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;[!note]&lt;/p&gt;
+&lt;p&gt;提前登录阿里云准备好&lt;code&gt;AccessKey ID&lt;/code&gt;和&lt;code&gt;AccessKey Secret&lt;/code&gt;,配置时需要用到&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;登录之后的界面如下图，根据自己的信息填入之后保存&lt;/p&gt;
+&lt;p&gt;&lt;img alt="ddns-go-01" src="http://192.168.31.122:9001/webpic/ddns-go-01.png" /&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;验证&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;一切配置完成之后，查看阿里云的域名解析，多了一条对应的域名解析记录。解析的IP地址与我的带宽出口IP也是一致的，然后我在路由器里添加了端口映射，在外部使用&lt;code&gt;telnet&lt;/code&gt;检查了一下端口是通的，对应的服务也能够访问到。&lt;/p&gt;</html_content></item><item><title>黄山3天2夜游玩安排</title><description>&lt;p&gt;&lt;strong&gt;线路安排&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;DAY1：出发-西递-宏村-塔川-汤口镇住宿&lt;/p&gt;
+&lt;p&gt;DAY2: 黄山风景区一日游 -屯溪或原地住宿&lt;/p&gt;
+&lt;p&gt;DAY3: 屯溪老街、&lt;/p&gt;</description><html_content>&lt;p&gt;&lt;strong&gt;线路安排&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;DAY1：出发-西递-宏村-塔川-汤口镇住宿&lt;/p&gt;
+&lt;p&gt;DAY2: 黄山风景区一日游 -屯溪或原地住宿&lt;/p&gt;
+&lt;p&gt;DAY3: 屯溪老街、&lt;/p&gt;</html_content></item></search>

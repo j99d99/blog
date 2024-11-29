@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用ddns-go实现家庭网络ddns域名动态解析</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>使用ddns-go实现家庭网络ddns域名动态解析</h3>
+        <div class="tag-container">
+        
+            <span>
+                <img src="../static/img/日历_calendar-three.png" class="img-icon">
+                <a>2024-11-10</a>
+            </span>
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>群晖</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>docker</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>ddns</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p><strong>引言</strong></p>
+<p>很多家庭都会有nas设备来存放个人资料、剧集。或者小型miniPc来当服务器使用的情况，由于放在家庭内网外部无法直接访问到，当然想要实现外部访问的话，方案肯定是有的，如今实现这个需求使用较多的方案个人认为就是内网穿透和域名动态解析(ddns)了，使用内网穿透需要借助公网服务器,也就是需要花钱采购公网服务器，这个是需要投入资金成本的，而今天给大家介绍的是域名动态解析的方案，这种方案不需要投入资金成本，只需要更改家庭带宽的拨号方式为桥架模式即可，以我家使用的中国电信为例，默认使用的是路由模式，宽带安装好之后即可使用，不需要路由器拨号，是没有公网IP的，电话客服让其更改为桥接模式并开通公网IP，然后通过路由器拨号上网的方式即可获取公网IP，这样使用ddns的前提条件就满足啦。其实很多路由器都有ddns的功能，但是很多都是自带需要注册第三方服务使用它们提供的子域名的那些，我不太喜欢使用，所以打算自己部署</p>
+<blockquote>
+<p>不是改成了桥接模式就一定会有公网IP的，本人刚开通的时候确实有公网IP，使用一段时间之后的某一天突然无法使用了。排查了好久，发现实际查询的公网IP和PPOE拨号获取的IP地址不一样，让电信排查之后，告知没有开通公网IP。也是很无语，估计是被他们偷偷的关闭掉了，让其再次开通后一切又正常了</p>
+</blockquote>
+<p><strong>方案实现</strong></p>
+<p>经过一翻资料查阅，发现<code>ddns-go</code>挺不错，支持的域名服务商很多，部署支持Mac、Windows、Linux系统，支持ARM、x86架构。部署方便，还支持docker。我有一台黑群晖设备放在家里的，平时在公司也有访问它的需求，正好借助群晖的docker容器的方式部署。</p>
+<ol>
+<li>镜像地址</li>
+</ol>
+<p><code>https://hub.docker.com/r/jeessy/ddns-go</code></p>
+<ol>
+<li>部署</li>
+</ol>
+<p>在镜像地址页有详细的部署方式，我选的是不使用<code>host模式</code>的运行方式,根据自己的需求自行选择即可</p>
+<p>```bash
+   docker run -d --name ddns-go --restart=always -p 9876:9876 -v /volume1/docker/ddns-go:/root jeessy/ddns-go</p>
+<p>```</p>
+<ol>
+<li>配置aliddns</li>
+</ol>
+<p>配置aliddns也很方便，部署完成之后，在浏览器打开ddns-go管理界面进行配置。登陆时需要输入账号密码，首次输入时随意，会自动创建，后续使用这个账号密码登录</p>
+<blockquote>
+<p>[!note]</p>
+<p>提前登录阿里云准备好<code>AccessKey ID</code>和<code>AccessKey Secret</code>,配置时需要用到</p>
+</blockquote>
+<p>登录之后的界面如下图，根据自己的信息填入之后保存</p>
+<p><img alt="ddns-go-01" src="http://192.168.31.122:9001/webpic/ddns-go-01.png" /></p>
+<ol>
+<li>验证</li>
+</ol>
+<p>一切配置完成之后，查看阿里云的域名解析，多了一条对应的域名解析记录。解析的IP地址与我的带宽出口IP也是一致的，然后我在路由器里添加了端口映射，在外部使用<code>telnet</code>检查了一下端口是通的，对应的服务也能够访问到。</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

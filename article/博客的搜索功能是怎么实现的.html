@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客的搜索功能是怎么实现的</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>博客的搜索功能是怎么实现的</h3>
+        <div class="tag-container">
+        
+            <span>
+                <img src="../static/img/日历_calendar-three.png" class="img-icon">
+                <a>2024-11-19</a>
+            </span>
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>个人博客</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p>之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的</p>
+<p><strong>思路</strong></p>
+<p>假设我们有一个<code>posts</code> 的包含所有文章信息的列表， 通过<code>generate_search_xml</code>函数处理传入的<code>posts</code>参数，将文章的标题、内容等信息写入一个<code>search.xml</code>文件内，后续在通过搜索页面对该文件内容进行搜索实现搜索展示。这里涉及到两个部分：</p>
+<ul>
+<li><code>search.xml</code>文件的生成，由<code>generate_search_xml</code>函数实现</li>
+<li>搜索页面对<code>search.xml</code>文件进行搜索，并展示搜索结果</li>
+</ul>
+<p><strong><code>generate_search_xml</code>函数实现</strong></p>
+<pre class="codehilite"><code class="language-python">import xml.etree.ElementTree as ET
+def generate_search_xml(posts):
+    &quot;&quot;&quot;根据文章信息生成 search.xml&quot;&quot;&quot;
+    search_xml = ET.Element('search')
+
+    for post in posts:
+        title = post['title']
+        html_content = post['html_content']
+        metadata = post['metadata']
+
+        # 生成描述，提取文章正文的前200个字符作为描述
+        description = html_content[:200].strip()  # 提取内容的前200个字符作为描述
+        if len(description) == 200 and html_content[200] not in [' ', '&lt;']:  # 防止截断在单词或标签中间
+            description = description.rsplit(' ', 1)[0]
+
+        item = ET.SubElement(search_xml, 'item')
+        title_elem = ET.SubElement(item, 'title')
+        title_elem.text = title
+        description_elem = ET.SubElement(item, 'description')
+        description_elem.text = description
+        # metadata_elem = ET.SubElement(item, 'metadata')
+        # metadata_elem.text = metadata
+        html_content_elem = ET.SubElement(item, 'html_content')
+        html_content_elem.text = html_content
+
+    # 写入到 search.xml 文件
+    tree = ET.ElementTree(search_xml)
+    output_path = os.path.join(OUTPUT_DIR, 'search.xml')
+    tree.write(output_path, encoding='utf-8', xml_declaration=True)
+    # print(f&quot;search.xml 文件已保存至 {output_path}&quot;)
+    print(f&quot;Generated {search_xml}&quot;)
+</code></pre>
+
+<p>上面这个函数，将每篇文章的信息以<code>&lt;item&gt;</code>元素添加到<code>search.xml</code>文件的根元素<code>&lt;search&gt;</code>当中，每个 <code>&lt;item&gt;</code> (也就是每篇文章)包含：</p>
+<ul>
+<li><code>&lt;title&gt;</code>: 文章标题</li>
+<li><code>&lt;description&gt;</code>: 文章描述（前200个字符）</li>
+<li><code>&lt;html_content&gt;</code>: 文章的完整 HTML 内容</li>
+</ul>
+<p><strong>搜索页面的实现</strong></p>
+<p>首先通过<code>loadXML()</code>函数加载<code>search.xml</code>文件到<code>searchData</code>列表，然后通过<code>id="search-input"</code>获取搜索关键字<code>query</code>，通过方法<code>filter</code>查找包含关键字<code>query</code>的内容。最后对查找结果使用<code>displayResults</code>方法进行生成展示</p>
+<ul>
+<li>搜索页模板<code>search.html</code></li>
+</ul>
+<pre class="codehilite"><code class="language-html">{% extends &quot;base.html&quot; %}
+
+{% block title %}搜索页面{% endblock %}
+
+{% block content %}
+    &lt;!-- 页面主要内容 --&gt;
+    &lt;div class=&quot;search-box content&quot;&gt;
+{#        &lt;h1&gt;搜索页面&lt;/h1&gt;#}
+
+        &lt;div id=&quot;search-container&quot;&gt;
+            &lt;img src=&quot;../static/img/搜索_search.png&quot; alt=&quot;Search Icon&quot; class=&quot;search-icon&quot;&gt; &lt;!-- 这里是你的搜索图标图片路径 --&gt;
+            &lt;input type=&quot;text&quot; id=&quot;search-input&quot; placeholder=&quot;请输入搜索关键字&quot; oninput=&quot;search()&quot;&gt;
+        &lt;/div&gt;
+
+        &lt;div id=&quot;search-results&quot;&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;script&gt;
+        // 初始化变量
+        let searchData = [];
+
+        // 加载 search.xml 数据
+        function loadXML() {
+            fetch('search.xml')
+                .then(response =&gt; response.text())
+                .then(data =&gt; {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, 'text/xml');
+                    const items = xmlDoc.getElementsByTagName('item');
+                    searchData = [];
+
+                    for (let i = 0; i &lt; items.length; i++) {
+                        let title = items[i].getElementsByTagName('title')[0].textContent;
+                        let description = items[i].getElementsByTagName('description')[0].textContent;
+                        let html_content = items[i].getElementsByTagName('html_content')[0].textContent;
+                        searchData.push({ title, description,html_content });
+                    }
+                })
+                .catch(error =&gt; console.error('加载 XML 数据失败:', error));
+        }
+
+        function search() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+
+            // 如果搜索框为空，清空结果并返回
+            if (query === '') {
+                document.getElementById('search-results').innerHTML = ''; // 清空搜索结果
+                return;
+            }
+
+            // 如果有搜索内容，执行搜索操作
+            const results = searchData.filter(item =&gt;
+                item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query) || item.html_content.toLowerCase().includes(query)
+            );
+            displayResults(query,results);
+        }
+
+        // 显示搜索结果
+        function displayResults(query,results) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '&lt;p&gt;没有找到相关结果&lt;/p&gt;';
+                return;
+            }
+
+            results.forEach(item =&gt; {
+                const resultTitle = document.createElement('h1');
+                resultTitle.innerHTML=`包含关键字&lt;span class=&quot;query-color&quot;&gt;${query}&lt;/span&gt;的文章:`;
+                resultsContainer.appendChild(resultTitle);
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    &lt;div class=&quot;result-title&quot;&gt;
+                            &lt;img src=&quot;../static/img/文字_text.png&quot;&gt;
+                            &lt;a href=&quot;article/${item.title}.html&quot;&gt;${item.title}&lt;/a&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;result-description&quot;&gt;${item.description}&lt;/div&gt;
+                `;
+                resultsContainer.appendChild(resultItem);
+            });
+        }
+
+        // 初始化时加载 XML 数据
+        window.onload = loadXML;
+    &lt;/script&gt;
+
+{% endblock %}
+</code></pre>
+
+<ul>
+<li>搜索页面渲染函数实现</li>
+</ul>
+<pre class="codehilite"><code class="language-python">def generate_search_pages():
+    &quot;&quot;&quot; 根据search_template 生成搜索页面&quot;&quot;&quot;
+    search_template = env.get_template('search.html')
+    search_output_file = os.path.join(OUTPUT_DIR, f&quot;search.html&quot;)
+    # 创建目录（如果不存在）
+    # os.makedirs(os.path.dirname(share_output_file), exist_ok=True)
+    with open(search_output_file, 'w', encoding='utf-8') as file:
+        file.write(search_template.render())
+    print(f&quot;Generated {search_output_file}&quot;)
+</code></pre>
+
+<p>这样搜索功能就完成了。</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

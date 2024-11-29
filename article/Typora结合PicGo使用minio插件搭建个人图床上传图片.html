@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typora结合PicGo使用minio插件搭建个人图床上传图片</title>
+    <link rel="icon" href="../static/img/favicon.png" type="image/png">
+    <link rel="stylesheet" href="../static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+                <div class="nav-title"><a href="/index.html">各自花开</a></div>
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories.html">分类</a>
+                        <li><a href="/tags.html">标签</a>
+
+
+
+
+
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="https://www.baidu.com" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/分享_share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>Typora结合PicGo使用minio插件搭建个人图床上传图片</h3>
+        <div class="tag-container">
+        
+            <span>
+                <img src="../static/img/日历_calendar-three.png" class="img-icon">
+                <a>2024-11-10</a>
+            </span>
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>群晖</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>docker</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/标签_tag-one.png" class="img-icon">
+                <a>图床</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p><strong>引言</strong>：</p>
+<p>我们在平时写文章或者博客的时候，经常使用markdown格式来编写，而Typora就是一款Markdown编辑器被大家使用，但是我们在写作过程当中经常需要插入图片，由于图片保存在本地，插入到文章之后引用的也是本地地址导致我们写好的文章发布出去的时候图片无法被加载。所以我们需要一个专门的地方来存放这些图片，而这个地方就叫图床，像微信公众号等大厂家的写作平台都自带图床，写作的时候我们把图片上传之后在插入到平台的写作编辑器里即可，对于我们本地写作的话也可以实现这样的功能，就是需要自建图床,本文我们介绍使用minio来搭建一个图床，然后借助PicGO这款软件，我们在Typora里面配置PicGo之后，当我们插入图片之后，会自动把图片上传到minio图床内，并将Typora编辑器内的图片地址修改成图床图片的访问地址，这样当我们文章写好发布出去的时候就不用担心图片无法加载了</p>
+<p><strong>涉及的软件</strong>：</p>
+<ul>
+<li>Typora</li>
+<li>minio</li>
+<li>PicGO</li>
+<li>NodeJs（PicGo安装需要）</li>
+</ul>
+<p><strong>开始动起来吧</strong>：</p>
+<p><strong>一、使用minio搭建对象存储</strong>：</p>
+<p><strong>1. 什么是minio</strong></p>
+<p>minio是一个高性能的对象存储服务，支持分布式存储，具有高扩展性、高可用性，部署方式多样，部署简单，官方有详细的<a href="https://min.io/docs/minio/container/index.html">安装文档</a>可参考</p>
+<p><strong>2. 使用docker部署minio</strong></p>
+<p>minio的安装方式很多，我们这里选择使用docker部署</p>
+<pre class="codehilite"><code class="language-bash">docker run \
+-p 9000:9000 \
+-p 9001:9001 \
+--name minio \
+-d --restart=always \
+-e &quot;MINIO_ROOT_USER=admin&quot; \
+-e &quot;MINIO_ROOT_PASSWORD=passwd&quot; \
+-v /volume1/docker/minio/data:/data \
+-v /volume1/docker/minio/config:/root/.minio \
+minio/minio server /data --console-address &quot;:9001&quot; 
+</code></pre>
+
+<p><strong>3. 登录minio服务web控制台创建bucket以及accessKey和secretKey</strong></p>
+<ul>
+<li>创建bucket并配置匿名访问权限为<code>readonly</code></li>
+</ul>
+<p>点击<code>Buckets</code>-&gt;点击右上角的<code>Create Buckes</code> -&gt;然后在<code>Create Bucket</code>页面输入<code>Bucket Name</code></p>
+<p><img alt="Snipaste_2024-10-30_15-59-43" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_15-59-43_repeat_1730275414950__230387.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-00-34" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-00-34_repeat_1730275405309__649124.png" /></p>
+<p>设置创建的Bucket的匿名访问为<code>radonly</code></p>
+<p><img alt="Snipaste_2024-10-30_16-02-05" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-02-05_repeat_1730275373013__439525.png" /></p>
+<ul>
+<li>创建<code>accessKey</code>和<code>secretKey</code>并记录下来，在后面<code>PicGo</code>配置插件minio插件时需要使用</li>
+</ul>
+<p><img alt="Snipaste_2024-10-30_16-17-01" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-17-01_repeat_1730276261677__986201.png" /></p>
+<p><strong>二、安装PicGo，配置minio插件</strong>：</p>
+<p><strong>1. PicGo介绍</strong></p>
+<p>PicGO是一个用于快速上传图片并获取图片URL链接的工具，<a href="https://molunerfinn.com/PicGo/">PicGO官网</a> 下载安装即可，需要注意的是这款软件的安装依赖<code>Nodejs</code>,所以需要先安装NodeJs环境。</p>
+<p>软件安装比较简单，这里就不介绍</p>
+<p><strong>2. PicGo安装配置minio插件</strong></p>
+<p>minio插件全称<code>picgo-plugin-minio</code>，可以在它的<a href="https://github.com/Herbertzz/picgo-plugin-minio">官网</a>查看更多信息，安装好<code>PicGo</code>软件之后在软件的<code>插件设置</code>界面输入关键字<code>minio</code>搜索插件，然后点击安装即可，安装完成会显示已安装，然后在<code>图床设置</code> 选项里面可以看到多出一个<code>minio 图床</code>选项</p>
+<p><img alt="Snipaste_2024-10-30_16-30-44" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-30-44_repeat_1730277107674__930034.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-32-37" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-32-37_repeat_1730277196695__724948.png" /></p>
+<p>PicGo配置minio图床，具体的使用以及参数说明可以参考<a href="https://github.com/Herbertzz/picgo-plugin-minio">picgo-plugin-minio</a>插件的官方说明</p>
+<p><img alt="Snipaste_2024-10-30_16-35-51" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-35-51_repeat_1730277419862__276891.png" /></p>
+<p><strong>三、安装Typora并配置PicGo自动上传</strong>：</p>
+<p>Typora的安装没有什么好说明的，需要注意的是这款软件是以前是不收费的，后来改成收费软件了，觉得好用可以支持一下正版，这里主要说说Typora如何配置PicGo来实现图片自动上传的</p>
+<p>在<code>文件</code>-&gt;<code>偏好设置</code>-&gt;<code>图像</code>进行设置</p>
+<ol>
+<li>
+<p><code>插入图片时</code>选项设置成上传图片</p>
+</li>
+<li>
+<p><code>上传服务设定</code>选项进行picgo服务相关设置</p>
+</li>
+</ol>
+<p><img alt="" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_17-01-56_repeat_1730278931812__477406.png" /></p>
+<p>配置完成可以点击<code>验证图片上传选项</code>进行验证</p>
+<p><img alt="Snipaste_2024-10-30_16-48-40" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-48-40_repeat_1730278609242__941936.png" /></p>
+<p><strong>总结</strong>：</p>
+<p>回顾整个配置过程并不复杂，需要注意PicGo安装minio插件的时候，我开始点击安装很多次都安装不上，最后怀疑是个人网络问题导致，开了科学上网之后安装成功，碰到类似问题的可以参考处理一下。</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

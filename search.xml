@@ -516,10 +516,4 @@ PS C:\Windows\system32&amp;gt;
 &lt;ol&gt;
 &lt;li&gt;验证&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;一切配置完成之后，查看阿里云的域名解析，多了一条对应的域名解析记录。解析的IP地址与我的带宽出口IP也是一致的，然后我在路由器里添加了端口映射，在外部使用&lt;code&gt;telnet&lt;/code&gt;检查了一下端口是通的，对应的服务也能够访问到。&lt;/p&gt;</html_content></item><item><title>黄山3天2夜游玩安排</title><description>&lt;p&gt;&lt;strong&gt;线路安排&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;DAY1：出发-西递-宏村-塔川-汤口镇住宿&lt;/p&gt;
-&lt;p&gt;DAY2: 黄山风景区一日游 -屯溪或原地住宿&lt;/p&gt;
-&lt;p&gt;DAY3: 屯溪老街、&lt;/p&gt;</description><html_content>&lt;p&gt;&lt;strong&gt;线路安排&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;DAY1：出发-西递-宏村-塔川-汤口镇住宿&lt;/p&gt;
-&lt;p&gt;DAY2: 黄山风景区一日游 -屯溪或原地住宿&lt;/p&gt;
-&lt;p&gt;DAY3: 屯溪老街、&lt;/p&gt;</html_content></item></search>
+&lt;p&gt;一切配置完成之后，查看阿里云的域名解析，多了一条对应的域名解析记录。解析的IP地址与我的带宽出口IP也是一致的，然后我在路由器里添加了端口映射，在外部使用&lt;code&gt;telnet&lt;/code&gt;检查了一下端口是通的，对应的服务也能够访问到。&lt;/p&gt;</html_content></item></search>

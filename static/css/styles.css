@@ -147,6 +147,7 @@ img {
     display: flex; /* 图标本身也用 flex 布局 */
     align-items: center; /* 图标垂直居中对齐 */
     margin-right: 8px; /* 图标与文字之间的间距 */
+    height: 1.5em;
 }
 
 .content-span .text {

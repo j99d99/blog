@@ -144,7 +144,7 @@ img {
   line-height: 1.5; /* 设置文本的行高 */
 }
 
-.img-icon {
+.img-icon,.content-icon {
   height: 1em; /* 图标高度等于文本行高 */
   width: auto; /* 保持图标宽高比 */
   margin-right: 0.5em; /* 图标和文字之间的间距 */

@@ -101,15 +101,17 @@
             const resultsContainer = document.getElementById('search-results');
             resultsContainer.innerHTML = '';
 
+            const resultTitle = document.createElement('h1');
+            resultTitle.innerHTML=`包含关键字<span class="query-color">${query}</span>的文章:`;
+            resultsContainer.appendChild(resultTitle);
+
             if (results.length === 0) {
                 resultsContainer.innerHTML = '<p>没有找到相关结果</p>';
                 return;
             }
 
             results.forEach(item => {
-                const resultTitle = document.createElement('h1');
-                resultTitle.innerHTML=`包含关键字<span class="query-color">${query}</span>的文章:`;
-                resultsContainer.appendChild(resultTitle);
+
                 const resultItem = document.createElement('div');
                 resultItem.className = 'result-item';
                 resultItem.innerHTML = `

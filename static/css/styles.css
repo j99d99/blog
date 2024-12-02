@@ -588,12 +588,12 @@ pre code {
     align-items: center;
 }
 
-.result-title img {
-    /* 使图片与链接高度一致 */
-    height: 1em;
-    margin-right: 10px;
-    /*vertical-align: middle;   确保图片和文字垂直居中 */
-}
+/*.result-title img {*/
+/*    !* 使图片与链接高度一致 *!*/
+/*    height: 1em;*/
+/*    margin-right: 10px;*/
+/*    !*vertical-align: middle;   确保图片和文字垂直居中 *!*/
+/*}*/
 
 .result-title a {
     display: inline-block;

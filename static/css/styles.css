@@ -138,17 +138,26 @@ img {
     flex-direction: column;
     display: flex;
 }
+.content-span {
+    display: flex; /* 使用 flex 布局 */
+    align-items: flex-start; /* 对齐到起始位置 */
+}
 
-.content-list div {
-    display: inline-flex;
-    align-items: center;
+.content-span .icon {
+    display: flex; /* 图标本身也用 flex 布局 */
+    align-items: center; /* 图标垂直居中对齐 */
+    margin-right: 8px; /* 图标与文字之间的间距 */
+}
+
+.content-span .text {
+    display: block; /* 保证文字内容正常换行 */
+    line-height: 1.5; /* 设置文字行高 */
 }
 
 /*内容区域文章标题前面图标*/
 .content-icon {
-    height: 1em;
-    margin-right: 10px;
-    margin-bottom: 10px;
+    height: 20px; /* 根据需要调整图标大小 */
+    width: auto;
 }
 
 

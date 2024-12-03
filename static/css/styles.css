@@ -492,7 +492,7 @@ footer p {
 
 /*@import url('article.css');*/
 /*文章页单独样式*/
-.article-content {
+.article-content-title {
     border-bottom: 1px dashed black;
 }
 .article-content h3 {

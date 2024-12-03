@@ -1,5 +1,163 @@
 <?xml version='1.0' encoding='utf-8'?>
-<search><item><title>为啥要从头搞一个博客</title><description>&lt;p&gt;&lt;strong&gt;为什么产生这个想法&lt;/strong&gt;&lt;/p&gt;
+<search><item><title>博客的搜索功能是怎么实现的</title><description>&lt;p&gt;之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;思路&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假设我们有一个&lt;code&gt;posts&lt;/code&gt; 的包含所有文章信息的列表，</description><html_content>&lt;p&gt;之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;思路&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假设我们有一个&lt;code&gt;posts&lt;/code&gt; 的包含所有文章信息的列表， 通过&lt;code&gt;generate_search_xml&lt;/code&gt;函数处理传入的&lt;code&gt;posts&lt;/code&gt;参数，将文章的标题、内容等信息写入一个&lt;code&gt;search.xml&lt;/code&gt;文件内，后续在通过搜索页面对该文件内容进行搜索实现搜索展示。这里涉及到两个部分：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;search.xml&lt;/code&gt;文件的生成，由&lt;code&gt;generate_search_xml&lt;/code&gt;函数实现&lt;/li&gt;
+&lt;li&gt;搜索页面对&lt;code&gt;search.xml&lt;/code&gt;文件进行搜索，并展示搜索结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;&lt;code&gt;generate_search_xml&lt;/code&gt;函数实现&lt;/strong&gt;&lt;/p&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;import xml.etree.ElementTree as ET
+def generate_search_xml(posts):
+    &amp;quot;&amp;quot;&amp;quot;根据文章信息生成 search.xml&amp;quot;&amp;quot;&amp;quot;
+    search_xml = ET.Element('search')
+
+    for post in posts:
+        title = post['title']
+        html_content = post['html_content']
+        metadata = post['metadata']
+
+        # 生成描述，提取文章正文的前200个字符作为描述
+        description = html_content[:200].strip()  # 提取内容的前200个字符作为描述
+        if len(description) == 200 and html_content[200] not in [' ', '&amp;lt;']:  # 防止截断在单词或标签中间
+            description = description.rsplit(' ', 1)[0]
+
+        item = ET.SubElement(search_xml, 'item')
+        title_elem = ET.SubElement(item, 'title')
+        title_elem.text = title
+        description_elem = ET.SubElement(item, 'description')
+        description_elem.text = description
+        # metadata_elem = ET.SubElement(item, 'metadata')
+        # metadata_elem.text = metadata
+        html_content_elem = ET.SubElement(item, 'html_content')
+        html_content_elem.text = html_content
+
+    # 写入到 search.xml 文件
+    tree = ET.ElementTree(search_xml)
+    output_path = os.path.join(OUTPUT_DIR, 'search.xml')
+    tree.write(output_path, encoding='utf-8', xml_declaration=True)
+    # print(f&amp;quot;search.xml 文件已保存至 {output_path}&amp;quot;)
+    print(f&amp;quot;Generated {search_xml}&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;上面这个函数，将每篇文章的信息以&lt;code&gt;&amp;lt;item&amp;gt;&lt;/code&gt;元素添加到&lt;code&gt;search.xml&lt;/code&gt;文件的根元素&lt;code&gt;&amp;lt;search&amp;gt;&lt;/code&gt;当中，每个 &lt;code&gt;&amp;lt;item&amp;gt;&lt;/code&gt; (也就是每篇文章)包含：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;title&amp;gt;&lt;/code&gt;: 文章标题&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;description&amp;gt;&lt;/code&gt;: 文章描述（前200个字符）&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;&amp;lt;html_content&amp;gt;&lt;/code&gt;: 文章的完整 HTML 内容&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;搜索页面的实现&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;首先通过&lt;code&gt;loadXML()&lt;/code&gt;函数加载&lt;code&gt;search.xml&lt;/code&gt;文件到&lt;code&gt;searchData&lt;/code&gt;列表，然后通过&lt;code&gt;id="search-input"&lt;/code&gt;获取搜索关键字&lt;code&gt;query&lt;/code&gt;，通过方法&lt;code&gt;filter&lt;/code&gt;查找包含关键字&lt;code&gt;query&lt;/code&gt;的内容。最后对查找结果使用&lt;code&gt;displayResults&lt;/code&gt;方法进行生成展示&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;搜索页模板&lt;code&gt;search.html&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-html"&gt;{% extends &amp;quot;base.html&amp;quot; %}
+
+{% block title %}搜索页面{% endblock %}
+
+{% block content %}
+    &amp;lt;!-- 页面主要内容 --&amp;gt;
+    &amp;lt;div class=&amp;quot;search-box content&amp;quot;&amp;gt;
+{#        &amp;lt;h1&amp;gt;搜索页面&amp;lt;/h1&amp;gt;#}
+
+        &amp;lt;div id=&amp;quot;search-container&amp;quot;&amp;gt;
+            &amp;lt;img src=&amp;quot;../static/img/搜索_search.png&amp;quot; alt=&amp;quot;Search Icon&amp;quot; class=&amp;quot;search-icon&amp;quot;&amp;gt; &amp;lt;!-- 这里是你的搜索图标图片路径 --&amp;gt;
+            &amp;lt;input type=&amp;quot;text&amp;quot; id=&amp;quot;search-input&amp;quot; placeholder=&amp;quot;请输入搜索关键字&amp;quot; oninput=&amp;quot;search()&amp;quot;&amp;gt;
+        &amp;lt;/div&amp;gt;
+
+        &amp;lt;div id=&amp;quot;search-results&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
+    &amp;lt;/div&amp;gt;
+    &amp;lt;script&amp;gt;
+        // 初始化变量
+        let searchData = [];
+
+        // 加载 search.xml 数据
+        function loadXML() {
+            fetch('search.xml')
+                .then(response =&amp;gt; response.text())
+                .then(data =&amp;gt; {
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data, 'text/xml');
+                    const items = xmlDoc.getElementsByTagName('item');
+                    searchData = [];
+
+                    for (let i = 0; i &amp;lt; items.length; i++) {
+                        let title = items[i].getElementsByTagName('title')[0].textContent;
+                        let description = items[i].getElementsByTagName('description')[0].textContent;
+                        let html_content = items[i].getElementsByTagName('html_content')[0].textContent;
+                        searchData.push({ title, description,html_content });
+                    }
+                })
+                .catch(error =&amp;gt; console.error('加载 XML 数据失败:', error));
+        }
+
+        function search() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+
+            // 如果搜索框为空，清空结果并返回
+            if (query === '') {
+                document.getElementById('search-results').innerHTML = ''; // 清空搜索结果
+                return;
+            }
+
+            // 如果有搜索内容，执行搜索操作
+            const results = searchData.filter(item =&amp;gt;
+                item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query) || item.html_content.toLowerCase().includes(query)
+            );
+            displayResults(query,results);
+        }
+
+        // 显示搜索结果
+        function displayResults(query,results) {
+            const resultsContainer = document.getElementById('search-results');
+            resultsContainer.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsContainer.innerHTML = '&amp;lt;p&amp;gt;没有找到相关结果&amp;lt;/p&amp;gt;';
+                return;
+            }
+
+            results.forEach(item =&amp;gt; {
+                const resultTitle = document.createElement('h1');
+                resultTitle.innerHTML=`包含关键字&amp;lt;span class=&amp;quot;query-color&amp;quot;&amp;gt;${query}&amp;lt;/span&amp;gt;的文章:`;
+                resultsContainer.appendChild(resultTitle);
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item';
+                resultItem.innerHTML = `
+                    &amp;lt;div class=&amp;quot;result-title&amp;quot;&amp;gt;
+                            &amp;lt;img src=&amp;quot;../static/img/文字_text.png&amp;quot;&amp;gt;
+                            &amp;lt;a href=&amp;quot;article/${item.title}.html&amp;quot;&amp;gt;${item.title}&amp;lt;/a&amp;gt;
+                    &amp;lt;/div&amp;gt;
+                    &amp;lt;div class=&amp;quot;result-description&amp;quot;&amp;gt;${item.description}&amp;lt;/div&amp;gt;
+                `;
+                resultsContainer.appendChild(resultItem);
+            });
+        }
+
+        // 初始化时加载 XML 数据
+        window.onload = loadXML;
+    &amp;lt;/script&amp;gt;
+
+{% endblock %}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;ul&gt;
+&lt;li&gt;搜索页面渲染函数实现&lt;/li&gt;
+&lt;/ul&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;def generate_search_pages():
+    &amp;quot;&amp;quot;&amp;quot; 根据search_template 生成搜索页面&amp;quot;&amp;quot;&amp;quot;
+    search_template = env.get_template('search.html')
+    search_output_file = os.path.join(OUTPUT_DIR, f&amp;quot;search.html&amp;quot;)
+    # 创建目录（如果不存在）
+    # os.makedirs(os.path.dirname(share_output_file), exist_ok=True)
+    with open(search_output_file, 'w', encoding='utf-8') as file:
+        file.write(search_template.render())
+    print(f&amp;quot;Generated {search_output_file}&amp;quot;)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;这样搜索功能就完成了。&lt;/p&gt;</html_content></item><item><title>为啥要从头搞一个博客</title><description>&lt;p&gt;&lt;strong&gt;为什么产生这个想法&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;其实，之前也有弄过个人博客站点，主要是想用来记录平时工作的一些文档，但最后终究是为了搭建而搭建，最开始使用的wordpress这种带后台的建站工具，但是个人不是很喜欢在后台编辑器里面写文章，最后不了了之，再之后又使用hexo这种静态博客生成工具,直接将自己本地的md格式文档直接生成静态博客，从这个角度来说确实挺适合我这种，但</description><html_content>&lt;p&gt;&lt;strong&gt;为什么产生这个想法&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;其实，之前也有弄过个人博客站点，主要是想用来记录平时工作的一些文档，但最后终究是为了搭建而搭建，最开始使用的wordpress这种带后台的建站工具，但是个人不是很喜欢在后台编辑器里面写文章，最后不了了之，再之后又使用hexo这种静态博客生成工具,直接将自己本地的md格式文档直接生成静态博客，从这个角度来说确实挺适合我这种，但是一直都没有找到一个自己觉得满意的主题，最后依旧作罢。最近又萌生了搭建博客的想法，结合前面两次的经验，想想还是自己写一个，以后如果有调整样式也更得心应手些。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;博客的产生&lt;/strong&gt;&lt;/p&gt;
@@ -232,165 +390,7 @@ def generate_index_page(posts,tags=None,categories=None):
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;其它页面比如文章页、标签页等参照首页的生成方式去渲染，当所有页面都渲染生成之后，就可以部署了，这样我的博客就建成了，最后给大家展示一下我自己写的博客吧&lt;/p&gt;
-&lt;p&gt;&lt;img alt="Blog_Demo" src="http://nas.izcat.com:9001/webpic/Blog_Demo.gif" /&gt;&lt;/p&gt;</html_content></item><item><title>博客的搜索功能是怎么实现的</title><description>&lt;p&gt;之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;思路&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;假设我们有一个&lt;code&gt;posts&lt;/code&gt; 的包含所有文章信息的列表，</description><html_content>&lt;p&gt;之前我介绍了我的博客的实现，其中最后的demo里面有个搜索功能，今天就来介绍下这个搜索功能的实现吧。其实静态博客的搜索功能实现起来挺简单的&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;思路&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;假设我们有一个&lt;code&gt;posts&lt;/code&gt; 的包含所有文章信息的列表， 通过&lt;code&gt;generate_search_xml&lt;/code&gt;函数处理传入的&lt;code&gt;posts&lt;/code&gt;参数，将文章的标题、内容等信息写入一个&lt;code&gt;search.xml&lt;/code&gt;文件内，后续在通过搜索页面对该文件内容进行搜索实现搜索展示。这里涉及到两个部分：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;search.xml&lt;/code&gt;文件的生成，由&lt;code&gt;generate_search_xml&lt;/code&gt;函数实现&lt;/li&gt;
-&lt;li&gt;搜索页面对&lt;code&gt;search.xml&lt;/code&gt;文件进行搜索，并展示搜索结果&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;&lt;code&gt;generate_search_xml&lt;/code&gt;函数实现&lt;/strong&gt;&lt;/p&gt;
-&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;import xml.etree.ElementTree as ET
-def generate_search_xml(posts):
-    &amp;quot;&amp;quot;&amp;quot;根据文章信息生成 search.xml&amp;quot;&amp;quot;&amp;quot;
-    search_xml = ET.Element('search')
-
-    for post in posts:
-        title = post['title']
-        html_content = post['html_content']
-        metadata = post['metadata']
-
-        # 生成描述，提取文章正文的前200个字符作为描述
-        description = html_content[:200].strip()  # 提取内容的前200个字符作为描述
-        if len(description) == 200 and html_content[200] not in [' ', '&amp;lt;']:  # 防止截断在单词或标签中间
-            description = description.rsplit(' ', 1)[0]
-
-        item = ET.SubElement(search_xml, 'item')
-        title_elem = ET.SubElement(item, 'title')
-        title_elem.text = title
-        description_elem = ET.SubElement(item, 'description')
-        description_elem.text = description
-        # metadata_elem = ET.SubElement(item, 'metadata')
-        # metadata_elem.text = metadata
-        html_content_elem = ET.SubElement(item, 'html_content')
-        html_content_elem.text = html_content
-
-    # 写入到 search.xml 文件
-    tree = ET.ElementTree(search_xml)
-    output_path = os.path.join(OUTPUT_DIR, 'search.xml')
-    tree.write(output_path, encoding='utf-8', xml_declaration=True)
-    # print(f&amp;quot;search.xml 文件已保存至 {output_path}&amp;quot;)
-    print(f&amp;quot;Generated {search_xml}&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;上面这个函数，将每篇文章的信息以&lt;code&gt;&amp;lt;item&amp;gt;&lt;/code&gt;元素添加到&lt;code&gt;search.xml&lt;/code&gt;文件的根元素&lt;code&gt;&amp;lt;search&amp;gt;&lt;/code&gt;当中，每个 &lt;code&gt;&amp;lt;item&amp;gt;&lt;/code&gt; (也就是每篇文章)包含：&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;&amp;lt;title&amp;gt;&lt;/code&gt;: 文章标题&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&amp;lt;description&amp;gt;&lt;/code&gt;: 文章描述（前200个字符）&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;&amp;lt;html_content&amp;gt;&lt;/code&gt;: 文章的完整 HTML 内容&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;&lt;strong&gt;搜索页面的实现&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;首先通过&lt;code&gt;loadXML()&lt;/code&gt;函数加载&lt;code&gt;search.xml&lt;/code&gt;文件到&lt;code&gt;searchData&lt;/code&gt;列表，然后通过&lt;code&gt;id="search-input"&lt;/code&gt;获取搜索关键字&lt;code&gt;query&lt;/code&gt;，通过方法&lt;code&gt;filter&lt;/code&gt;查找包含关键字&lt;code&gt;query&lt;/code&gt;的内容。最后对查找结果使用&lt;code&gt;displayResults&lt;/code&gt;方法进行生成展示&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;搜索页模板&lt;code&gt;search.html&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre class="codehilite"&gt;&lt;code class="language-html"&gt;{% extends &amp;quot;base.html&amp;quot; %}
-
-{% block title %}搜索页面{% endblock %}
-
-{% block content %}
-    &amp;lt;!-- 页面主要内容 --&amp;gt;
-    &amp;lt;div class=&amp;quot;search-box content&amp;quot;&amp;gt;
-{#        &amp;lt;h1&amp;gt;搜索页面&amp;lt;/h1&amp;gt;#}
-
-        &amp;lt;div id=&amp;quot;search-container&amp;quot;&amp;gt;
-            &amp;lt;img src=&amp;quot;../static/img/搜索_search.png&amp;quot; alt=&amp;quot;Search Icon&amp;quot; class=&amp;quot;search-icon&amp;quot;&amp;gt; &amp;lt;!-- 这里是你的搜索图标图片路径 --&amp;gt;
-            &amp;lt;input type=&amp;quot;text&amp;quot; id=&amp;quot;search-input&amp;quot; placeholder=&amp;quot;请输入搜索关键字&amp;quot; oninput=&amp;quot;search()&amp;quot;&amp;gt;
-        &amp;lt;/div&amp;gt;
-
-        &amp;lt;div id=&amp;quot;search-results&amp;quot;&amp;gt;&amp;lt;/div&amp;gt;
-    &amp;lt;/div&amp;gt;
-    &amp;lt;script&amp;gt;
-        // 初始化变量
-        let searchData = [];
-
-        // 加载 search.xml 数据
-        function loadXML() {
-            fetch('search.xml')
-                .then(response =&amp;gt; response.text())
-                .then(data =&amp;gt; {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(data, 'text/xml');
-                    const items = xmlDoc.getElementsByTagName('item');
-                    searchData = [];
-
-                    for (let i = 0; i &amp;lt; items.length; i++) {
-                        let title = items[i].getElementsByTagName('title')[0].textContent;
-                        let description = items[i].getElementsByTagName('description')[0].textContent;
-                        let html_content = items[i].getElementsByTagName('html_content')[0].textContent;
-                        searchData.push({ title, description,html_content });
-                    }
-                })
-                .catch(error =&amp;gt; console.error('加载 XML 数据失败:', error));
-        }
-
-        function search() {
-            const query = document.getElementById('search-input').value.trim().toLowerCase();
-
-            // 如果搜索框为空，清空结果并返回
-            if (query === '') {
-                document.getElementById('search-results').innerHTML = ''; // 清空搜索结果
-                return;
-            }
-
-            // 如果有搜索内容，执行搜索操作
-            const results = searchData.filter(item =&amp;gt;
-                item.title.toLowerCase().includes(query) || item.description.toLowerCase().includes(query) || item.html_content.toLowerCase().includes(query)
-            );
-            displayResults(query,results);
-        }
-
-        // 显示搜索结果
-        function displayResults(query,results) {
-            const resultsContainer = document.getElementById('search-results');
-            resultsContainer.innerHTML = '';
-
-            if (results.length === 0) {
-                resultsContainer.innerHTML = '&amp;lt;p&amp;gt;没有找到相关结果&amp;lt;/p&amp;gt;';
-                return;
-            }
-
-            results.forEach(item =&amp;gt; {
-                const resultTitle = document.createElement('h1');
-                resultTitle.innerHTML=`包含关键字&amp;lt;span class=&amp;quot;query-color&amp;quot;&amp;gt;${query}&amp;lt;/span&amp;gt;的文章:`;
-                resultsContainer.appendChild(resultTitle);
-                const resultItem = document.createElement('div');
-                resultItem.className = 'result-item';
-                resultItem.innerHTML = `
-                    &amp;lt;div class=&amp;quot;result-title&amp;quot;&amp;gt;
-                            &amp;lt;img src=&amp;quot;../static/img/文字_text.png&amp;quot;&amp;gt;
-                            &amp;lt;a href=&amp;quot;article/${item.title}.html&amp;quot;&amp;gt;${item.title}&amp;lt;/a&amp;gt;
-                    &amp;lt;/div&amp;gt;
-                    &amp;lt;div class=&amp;quot;result-description&amp;quot;&amp;gt;${item.description}&amp;lt;/div&amp;gt;
-                `;
-                resultsContainer.appendChild(resultItem);
-            });
-        }
-
-        // 初始化时加载 XML 数据
-        window.onload = loadXML;
-    &amp;lt;/script&amp;gt;
-
-{% endblock %}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;ul&gt;
-&lt;li&gt;搜索页面渲染函数实现&lt;/li&gt;
-&lt;/ul&gt;
-&lt;pre class="codehilite"&gt;&lt;code class="language-python"&gt;def generate_search_pages():
-    &amp;quot;&amp;quot;&amp;quot; 根据search_template 生成搜索页面&amp;quot;&amp;quot;&amp;quot;
-    search_template = env.get_template('search.html')
-    search_output_file = os.path.join(OUTPUT_DIR, f&amp;quot;search.html&amp;quot;)
-    # 创建目录（如果不存在）
-    # os.makedirs(os.path.dirname(share_output_file), exist_ok=True)
-    with open(search_output_file, 'w', encoding='utf-8') as file:
-        file.write(search_template.render())
-    print(f&amp;quot;Generated {search_output_file}&amp;quot;)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;这样搜索功能就完成了。&lt;/p&gt;</html_content></item><item><title>Typora结合PicGo使用minio插件搭建个人图床上传图片</title><description>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img alt="Blog_Demo" src="http://nas.izcat.com:9001/webpic/Blog_Demo.gif" /&gt;&lt;/p&gt;</html_content></item><item><title>Typora结合PicGo使用minio插件搭建个人图床上传图片</title><description>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;：&lt;/p&gt;
 &lt;p&gt;我们在平时写文章或者博客的时候，经常使用markdown格式来编写，而Typora就是一款Markdown编辑器被大家使用，但是我们在写作过程当中经常需要插入图片，由于图片保存在本地，插入到文章之后引用的也是本地地址导致我们写好的文章发布出去的时候图片无法被加载。所以我们需要一个专门的地方来存放这些图片，而这个地方就叫图床，像微信公众号</description><html_content>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;：&lt;/p&gt;
 &lt;p&gt;我们在平时写文章或者博客的时候，经常使用markdown格式来编写，而Typora就是一款Markdown编辑器被大家使用，但是我们在写作过程当中经常需要插入图片，由于图片保存在本地，插入到文章之后引用的也是本地地址导致我们写好的文章发布出去的时候图片无法被加载。所以我们需要一个专门的地方来存放这些图片，而这个地方就叫图床，像微信公众号等大厂家的写作平台都自带图床，写作的时候我们把图片上传之后在插入到平台的写作编辑器里即可，对于我们本地写作的话也可以实现这样的功能，就是需要自建图床,本文我们介绍使用minio来搭建一个图床，然后借助PicGO这款软件，我们在Typora里面配置PicGo之后，当我们插入图片之后，会自动把图片上传到minio图床内，并将Typora编辑器内的图片地址修改成图床图片的访问地址，这样当我们文章写好发布出去的时候就不用担心图片无法加载了&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;涉及的软件&lt;/strong&gt;：&lt;/p&gt;

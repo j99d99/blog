@@ -230,7 +230,7 @@ footer p {
 }
 
 .menu {
-    max-width: 1200px;
+    max-width: 940px;
     width: 100%;
     margin: 0 auto;
     display: flex;
@@ -381,7 +381,8 @@ footer p {
     text-align: center; /* 文字水平居中 */
     line-height: 1; /* 去除多余的行高 */
     white-space: nowrap; /* 防止文字换行 */
-    background: linear-gradient(45deg, #ff6b6b, #f8a5a5); /* 渐变颜色 */
+    /*background: linear-gradient(45deg, #ff6b6b, #f8a5a5);  渐变颜色 */
+    background: linear-gradient(45deg, #444, #666); /* 渐变颜色 */
     -webkit-background-clip: text; /* 文字应用背景剪裁 */
     color: transparent; /* 保证文字的颜色为透明，使用背景渐变来填充 */
 }

@@ -494,6 +494,7 @@ footer p {
 /*文章页单独样式*/
 .article-content-title {
     border-bottom: 1px dashed black;
+    margin-bottom: 20px;
 }
 .article-content h3 {
     text-align: center;
@@ -502,7 +503,7 @@ footer p {
 /*代码块样式*/
 pre {
     background-color: #f0f0f0;
-    padding: 20px;
+    /*padding: 20px;*/
     border-radius: 5px;
     overflow-x: auto; /* 使代码块可水平滚动 */
 }

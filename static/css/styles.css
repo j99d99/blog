@@ -160,7 +160,7 @@ img {
 .new-icon {
   font-weight: bold;
   color: #FFF;
-  background-color: #F89495;  /* 背景颜色 */
+  background-color: #666;  /* 背景颜色 */
   padding: 0 5px;  /* 内边距 */
   border-radius: 5px;  /* 圆角效果 */
   margin-right: 8px;  /* 文字与图标间距 */
@@ -255,6 +255,10 @@ footer p {
 .nav-menu > li {
     margin: 0 15px;
     position: relative;
+}
+
+.nav-menu > li:first-child {
+    margin: 0 15px 0 0;
 }
 
 .nav-menu >li > a {
@@ -382,7 +386,7 @@ footer p {
     line-height: 1; /* 去除多余的行高 */
     white-space: nowrap; /* 防止文字换行 */
     /*background: linear-gradient(45deg, #ff6b6b, #f8a5a5);  渐变颜色 */
-    background: linear-gradient(45deg, #444, #666); /* 渐变颜色 */
+    background: linear-gradient(45deg, #666, #666); /* 渐变颜色 */
     -webkit-background-clip: text; /* 文字应用背景剪裁 */
     color: transparent; /* 保证文字的颜色为透明，使用背景渐变来填充 */
 }
@@ -453,15 +457,15 @@ footer p {
     padding: 5px 10px; /* 内边距 */
     margin: 5px; /* 外边距 */
     /*background-color: #007BFF;  按钮背景色 */
-    color: #F89495;
-    border: 1px solid #F89495; /* 去除边框 */
+    color: #666;
+    border: 1px solid #666; /* 去除边框 */
     border-radius: 4px; /* 边框圆角 */
     cursor: pointer; /* 鼠标悬停时显示为指针 */
 }
 
 .tag-list a:hover {
-    color: #F76D8A; /* 按钮文字颜色 */
-    border: 1px solid #F76D8A; /* 去除边框 */
+    color: #444; /* 按钮文字颜色 */
+    border: 1px solid #444; /* 去除边框 */
     font-weight: bold;
 }
 
@@ -553,7 +557,7 @@ pre code {
 }
 
 #search-container input:focus {
-    border-color: #F89495;
+    border-color: #666;
     box-shadow: 0 0 5px rgba(247, 109, 138, 0.5);
 
 }
@@ -567,7 +571,7 @@ pre code {
 }
 
 .query-color {
-    color: #F89495;
+    color: #666;
 }
 .result-item {
     background-color: #fff;

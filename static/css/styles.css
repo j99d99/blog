@@ -386,7 +386,7 @@ footer p {
     line-height: 1; /* 去除多余的行高 */
     white-space: nowrap; /* 防止文字换行 */
     /*background: linear-gradient(45deg, #ff6b6b, #f8a5a5);  渐变颜色 */
-    background: linear-gradient(45deg, #666, #666); /* 渐变颜色 */
+    background: linear-gradient(45deg, #E87701, #DAC48C); /* 渐变颜色 */
     -webkit-background-clip: text; /* 文字应用背景剪裁 */
     color: transparent; /* 保证文字的颜色为透明，使用背景渐变来填充 */
 }
@@ -558,7 +558,7 @@ pre code {
 
 #search-container input:focus {
     border-color: #666;
-    box-shadow: 0 0 5px rgba(247, 109, 138, 0.5);
+    box-shadow: 0 0 5px rgba(232, 119, 1, 0.5);
 
 }
 

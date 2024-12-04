@@ -456,35 +456,7 @@ minio/minio server /data --console-address &amp;quot;:9001&amp;quot;
 &lt;p&gt;配置完成可以点击&lt;code&gt;验证图片上传选项&lt;/code&gt;进行验证&lt;/p&gt;
 &lt;p&gt;&lt;img alt="Snipaste_2024-10-30_16-48-40" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-48-40_repeat_1730278609242__941936.png" /&gt;&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;总结&lt;/strong&gt;：&lt;/p&gt;
-&lt;p&gt;回顾整个配置过程并不复杂，需要注意PicGo安装minio插件的时候，我开始点击安装很多次都安装不上，最后怀疑是个人网络问题导致，开了科学上网之后安装成功，碰到类似问题的可以参考处理一下。&lt;/p&gt;</html_content></item><item><title>切换到python虚拟环境时报错'无法加载文件Activate.ps1，因为在此系统上禁止运行脚本'解决办法</title><description>&lt;p&gt;&lt;strong&gt;问题描述&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;在windows的PowerShell或者Pycharm切换到python虚拟环境时报错“无法加载文件.\myenv\Scripts\Activate.ps1，因为在此系统上禁止运行脚本”&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;处理办法&lt;/strong&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;管理员身份运行PowerShell&lt;/p&gt;
-&lt;/li&gt;</description><html_content>&lt;p&gt;&lt;strong&gt;问题描述&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;在windows的PowerShell或者Pycharm切换到python虚拟环境时报错“无法加载文件.\myenv\Scripts\Activate.ps1，因为在此系统上禁止运行脚本”&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;处理办法&lt;/strong&gt;&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;
-&lt;p&gt;管理员身份运行PowerShell&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;在PowerShell里执行通过执行 &lt;code&gt;Get-ExecutionPolicy&lt;/code&gt; 查看当前策略和执行&lt;code&gt;Set-ExecutionPolicy Bypass&lt;/code&gt;修改当前策略为&lt;code&gt;Bypass&lt;/code&gt;即可&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre class="codehilite"&gt;&lt;code class="language-powershell"&gt;PS C:\Windows\system32&amp;gt; Get-ExecutionPolicy
-Restricted
-PS C:\Windows\system32&amp;gt; Set-ExecutionPolicy Bypass
-
-执行策略更改
-执行策略可帮助你防止执行不信任的脚本。更改执行策略可能会产生安全风险，如 https:/go.microsoft.com/fwlink/?LinkID=135170
-中的 about_Execution_Policies 帮助主题所述。是否要更改执行策略?
-[Y] 是(Y)  [A] 全是(A)  [N] 否(N)  [L] 全否(L)  [S] 暂停(S)  [?] 帮助 (默认值为“N”): y
-PS C:\Windows\system32&amp;gt; Get-ExecutionPolicy
-Bypass
-PS C:\Windows\system32&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;</html_content></item><item><title>使用ddns-go实现家庭网络ddns域名动态解析</title><description>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;回顾整个配置过程并不复杂，需要注意PicGo安装minio插件的时候，我开始点击安装很多次都安装不上，最后怀疑是个人网络问题导致，开了科学上网之后安装成功，碰到类似问题的可以参考处理一下。&lt;/p&gt;</html_content></item><item><title>使用ddns-go实现家庭网络ddns域名动态解析</title><description>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;很多家庭都会有nas设备来存放个人资料、剧集。或者小型miniPc来当服务器使用的情况，由于放在家庭内网外部无法直接访问到，当然想要实现外部访问的话，方案肯定是有的，如今实现这个需求使用较多的方案个人认为就是内网穿透和域名动态解析(ddns)了，使用内网穿透需要借助公网服务器,也就是需要花钱采购公网服务器，这个是需要投入资金成本的，而今天</description><html_content>&lt;p&gt;&lt;strong&gt;引言&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;很多家庭都会有nas设备来存放个人资料、剧集。或者小型miniPc来当服务器使用的情况，由于放在家庭内网外部无法直接访问到，当然想要实现外部访问的话，方案肯定是有的，如今实现这个需求使用较多的方案个人认为就是内网穿透和域名动态解析(ddns)了，使用内网穿透需要借助公网服务器,也就是需要花钱采购公网服务器，这个是需要投入资金成本的，而今天给大家介绍的是域名动态解析的方案，这种方案不需要投入资金成本，只需要更改家庭带宽的拨号方式为桥架模式即可，以我家使用的中国电信为例，默认使用的是路由模式，宽带安装好之后即可使用，不需要路由器拨号，是没有公网IP的，电话客服让其更改为桥接模式并开通公网IP，然后通过路由器拨号上网的方式即可获取公网IP，这样使用ddns的前提条件就满足啦。其实很多路由器都有ddns的功能，但是很多都是自带需要注册第三方服务使用它们提供的子域名的那些，我不太喜欢使用，所以打算自己部署&lt;/p&gt;
 &lt;blockquote&gt;
@@ -516,4 +488,32 @@ PS C:\Windows\system32&amp;gt;
 &lt;ol&gt;
 &lt;li&gt;验证&lt;/li&gt;
 &lt;/ol&gt;
-&lt;p&gt;一切配置完成之后，查看阿里云的域名解析，多了一条对应的域名解析记录。解析的IP地址与我的带宽出口IP也是一致的，然后我在路由器里添加了端口映射，在外部使用&lt;code&gt;telnet&lt;/code&gt;检查了一下端口是通的，对应的服务也能够访问到。&lt;/p&gt;</html_content></item></search>
+&lt;p&gt;一切配置完成之后，查看阿里云的域名解析，多了一条对应的域名解析记录。解析的IP地址与我的带宽出口IP也是一致的，然后我在路由器里添加了端口映射，在外部使用&lt;code&gt;telnet&lt;/code&gt;检查了一下端口是通的，对应的服务也能够访问到。&lt;/p&gt;</html_content></item><item><title>切换到python虚拟环境时报错'无法加载文件Activate.ps1，因为在此系统上禁止运行脚本'解决办法</title><description>&lt;p&gt;&lt;strong&gt;问题描述&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在windows的PowerShell或者Pycharm切换到python虚拟环境时报错“无法加载文件.\myenv\Scripts\Activate.ps1，因为在此系统上禁止运行脚本”&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;处理办法&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;管理员身份运行PowerShell&lt;/p&gt;
+&lt;/li&gt;</description><html_content>&lt;p&gt;&lt;strong&gt;问题描述&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在windows的PowerShell或者Pycharm切换到python虚拟环境时报错“无法加载文件.\myenv\Scripts\Activate.ps1，因为在此系统上禁止运行脚本”&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;处理办法&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;管理员身份运行PowerShell&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;在PowerShell里执行通过执行 &lt;code&gt;Get-ExecutionPolicy&lt;/code&gt; 查看当前策略和执行&lt;code&gt;Set-ExecutionPolicy Bypass&lt;/code&gt;修改当前策略为&lt;code&gt;Bypass&lt;/code&gt;即可&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre class="codehilite"&gt;&lt;code class="language-powershell"&gt;PS C:\Windows\system32&amp;gt; Get-ExecutionPolicy
+Restricted
+PS C:\Windows\system32&amp;gt; Set-ExecutionPolicy Bypass
+
+执行策略更改
+执行策略可帮助你防止执行不信任的脚本。更改执行策略可能会产生安全风险，如 https:/go.microsoft.com/fwlink/?LinkID=135170
+中的 about_Execution_Policies 帮助主题所述。是否要更改执行策略?
+[Y] 是(Y)  [A] 全是(A)  [N] 否(N)  [L] 全否(L)  [S] 暂停(S)  [?] 帮助 (默认值为“N”): y
+PS C:\Windows\system32&amp;gt; Get-ExecutionPolicy
+Bypass
+PS C:\Windows\system32&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;</html_content></item></search>

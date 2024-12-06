@@ -110,24 +110,24 @@ minio/minio server /data --console-address &quot;:9001&quot;
 <li>创建bucket并配置匿名访问权限为<code>readonly</code></li>
 </ul>
 <p>点击<code>Buckets</code>-&gt;点击右上角的<code>Create Buckes</code> -&gt;然后在<code>Create Bucket</code>页面输入<code>Bucket Name</code></p>
-<p><img alt="Snipaste_2024-10-30_15-59-43" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_15-59-43_repeat_1730275414950__230387.png" /></p>
-<p><img alt="Snipaste_2024-10-30_16-00-34" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-00-34_repeat_1730275405309__649124.png" /></p>
+<p><img alt="Snipaste_2024-10-30_15-59-43" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_15-59-43_repeat_1730275414950__230387.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-00-34" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-00-34_repeat_1730275405309__649124.png" /></p>
 <p>设置创建的Bucket的匿名访问为<code>radonly</code></p>
-<p><img alt="Snipaste_2024-10-30_16-02-05" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-02-05_repeat_1730275373013__439525.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-02-05" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-02-05_repeat_1730275373013__439525.png" /></p>
 <ul>
 <li>创建<code>accessKey</code>和<code>secretKey</code>并记录下来，在后面<code>PicGo</code>配置插件minio插件时需要使用</li>
 </ul>
-<p><img alt="Snipaste_2024-10-30_16-17-01" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-17-01_repeat_1730276261677__986201.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-17-01" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-17-01_repeat_1730276261677__986201.png" /></p>
 <p><strong>二、安装PicGo，配置minio插件</strong>：</p>
 <p><strong>1. PicGo介绍</strong></p>
 <p>PicGO是一个用于快速上传图片并获取图片URL链接的工具，<a href="https://molunerfinn.com/PicGo/">PicGO官网</a> 下载安装即可，需要注意的是这款软件的安装依赖<code>Nodejs</code>,所以需要先安装NodeJs环境。</p>
 <p>软件安装比较简单，这里就不介绍</p>
 <p><strong>2. PicGo安装配置minio插件</strong></p>
 <p>minio插件全称<code>picgo-plugin-minio</code>，可以在它的<a href="https://github.com/Herbertzz/picgo-plugin-minio">官网</a>查看更多信息，安装好<code>PicGo</code>软件之后在软件的<code>插件设置</code>界面输入关键字<code>minio</code>搜索插件，然后点击安装即可，安装完成会显示已安装，然后在<code>图床设置</code> 选项里面可以看到多出一个<code>minio 图床</code>选项</p>
-<p><img alt="Snipaste_2024-10-30_16-30-44" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-30-44_repeat_1730277107674__930034.png" /></p>
-<p><img alt="Snipaste_2024-10-30_16-32-37" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-32-37_repeat_1730277196695__724948.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-30-44" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-30-44_repeat_1730277107674__930034.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-32-37" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-32-37_repeat_1730277196695__724948.png" /></p>
 <p>PicGo配置minio图床，具体的使用以及参数说明可以参考<a href="https://github.com/Herbertzz/picgo-plugin-minio">picgo-plugin-minio</a>插件的官方说明</p>
-<p><img alt="Snipaste_2024-10-30_16-35-51" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-35-51_repeat_1730277419862__276891.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-35-51" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-35-51_repeat_1730277419862__276891.png" /></p>
 <p><strong>三、安装Typora并配置PicGo自动上传</strong>：</p>
 <p>Typora的安装没有什么好说明的，需要注意的是这款软件是以前是不收费的，后来改成收费软件了，觉得好用可以支持一下正版，这里主要说说Typora如何配置PicGo来实现图片自动上传的</p>
 <p>在<code>文件</code>-&gt;<code>偏好设置</code>-&gt;<code>图像</code>进行设置</p>
@@ -139,9 +139,9 @@ minio/minio server /data --console-address &quot;:9001&quot;
 <p><code>上传服务设定</code>选项进行picgo服务相关设置</p>
 </li>
 </ol>
-<p><img alt="" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_17-01-56_repeat_1730278931812__477406.png" /></p>
+<p><img alt="" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_17-01-56_repeat_1730278931812__477406.png" /></p>
 <p>配置完成可以点击<code>验证图片上传选项</code>进行验证</p>
-<p><img alt="Snipaste_2024-10-30_16-48-40" src="http://192.168.31.122:9001/webpic/Snipaste_2024-10-30_16-48-40_repeat_1730278609242__941936.png" /></p>
+<p><img alt="Snipaste_2024-10-30_16-48-40" src="http://nas.izcat.com:9001/webpic/Snipaste_2024-10-30_16-48-40_repeat_1730278609242__941936.png" /></p>
 <p><strong>总结</strong>：</p>
 <p>回顾整个配置过程并不复杂，需要注意PicGo安装minio插件的时候，我开始点击安装很多次都安装不上，最后怀疑是个人网络问题导致，开了科学上网之后安装成功，碰到类似问题的可以参考处理一下。</p>
         </div>

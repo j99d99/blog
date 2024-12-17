@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K线技术分析指标学习记录-看懂RSI</title>
+
+
+
+
+    <link rel="stylesheet" href="../static/css/styles.css"> <!-- 静态文件的链接 -->
+    <!-- 引入 highlight.js 的 CSS 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+
+</head>
+<body>
+    <header>
+        <div class="navbar container">
+            <div class="menu">
+
+                <ul class="nav-menu">
+                    
+                        <li><a href="/index.html">首页</a></li>
+                        <li><a href="/categories/折腾.html">折腾</a>
+                        <li><a href="/categories/随笔.html">随笔</a>
+
+                        <li><a href="webnav.html">网址导航</a></li>
+                        <li><a href="#" target="_blank">资源分享
+                        <!-- 外部链接图标 -->
+                        <img src="../static/img/share.png" alt="外部链接" style="position: absolute; top: 0; right: 0; width: 12px; height: 12px;transform: translateX(100%)">
+                        </a></li>
+                        <li><a href="/tags.html">标签</a>
+                        <li><a href="/search.html">搜索</a></li>
+                    
+                </ul>
+            </div>
+        </div>
+    </header>
+    <div id="app" class="container">
+
+            
+            
+
+
+        <div class="main container">
+                
+    <div class="content article-content">
+        <h3>K线技术分析指标学习记录-看懂RSI</h3>
+        <div class="tag-container article-content-title">
+        
+            <span>
+                <img src="../static/img/calendar-three.png" class="img-icon">
+                <a>2024-12-17</a>
+            </span>
+        
+
+
+
+
+
+
+
+
+            
+                <span>
+                <img src="../static/img/tag-one.svg" class="img-icon">
+                <a>理财</a>
+            </span>
+            
+                <span>
+                <img src="../static/img/tag-one.svg" class="img-icon">
+                <a>复盘</a>
+            </span>
+            
+
+        </div>
+        
+        <div class="container article">
+            <p><strong>RSI指标解释</strong></p>
+<p>RSI（<strong>相对强弱指数</strong>）是一个常用的技术分析指标，用来衡量一只股票在<strong>特定时间内涨跌的力度对比</strong>，可帮助我们判断股票是否<strong>超买</strong>或<strong>超卖</strong>。通俗点说，就是它是告诉你当前市场是不是<strong>涨太多了（需要回调）</strong> 或者 <strong>跌太多了（可能反弹）</strong> 。这个指标简单直观，短线交易非常常用，特别是震荡行情当中。</p>
+<p><strong>RSI的取值和计算方法</strong></p>
+<p><strong>取值范围</strong></p>
+<p>RSI 的值在0 到 100之间：</p>
+<p><strong>高于 70</strong>：表示股票可能<strong>超买</strong>，即价格涨得太猛了，可能会回调。</p>
+<p><strong>低于 30</strong>：表示股票可能<strong>超卖</strong>，即价格跌得太狠了，可能会反弹。</p>
+<p><strong>中间区域（30~70）</strong>：一般没有明确的买卖信号，市场较为平稳。</p>
+<p><strong>RSI是怎么算的？</strong></p>
+<p><strong>第一种传统计算公式</strong></p>
+<p>A 表示n天上涨幅度之后，B表示n天下跌幅度之和</p>
+<p>RSI（n)=A/（A+B)×100%</p>
+<p><strong>第二种计算公式</strong></p>
+<ol>
+<li>
+<p><strong>计算一定周期内的涨幅和跌幅</strong>（以14天的周期为例）：</p>
+</li>
+<li>
+<p>RSI 计算最近 14 天的涨跌幅。</p>
+</li>
+<li>把这 14 天内每天的涨幅加总得到 <strong>平均涨幅</strong>。</li>
+<li>
+<p>同理，把 14 天内每天的跌幅加总得到 <strong>平均跌幅</strong>。</p>
+</li>
+<li>
+<p><strong>计算强弱比（RS）：</strong>
+   $$
+   RS = \frac{\text{平均涨幅}}{\text{平均跌幅}}
+   $$</p>
+</li>
+</ol>
+<p>比如，最近 14 天平均涨幅是 2，平均跌幅是 1，RS = 2 / 1 = 2。</p>
+<ol>
+<li><strong>计算 RSI：</strong>
+   $$
+   RSI = 100 - \frac{100}{1 + RS}
+   $$</li>
+</ol>
+<p>如果 RS = 2
+   $$
+   RSI = 100 - \frac{100}{1 + 2} = 100 - 33.33 = 66.67
+   $$</p>
+<p><strong>简单的举个例子</strong></p>
+<p>假设某股票最近 14 天的收盘价涨跌如下(如果相比前一天是涨，就在涨幅这边加入，跌幅为0，同理，如果相比前一天是跌，在跌幅这边加入，涨幅为0)：</p>
+<p>| 日期   | 涨幅 | 跌幅 |
+| ------ | ---- | ---- |
+| 第1天  | 2    | 0    |
+| 第2天  | 0    | 1    |
+| 第3天  | 3    | 0    |
+| 第4天  | 0    | 2    |
+| ...    | ...  | ...  |
+| 第14天 | 1    | 0    |</p>
+<p>$$
+\begin{align}
+平均涨幅 = \frac{2 + 3 + 1}{14} = 0.43 
+\
+平均跌幅 = \frac{1 + 2}{14} = 0.21
+\
+RS=\frac{0.43}{0.21} = 2.05
+\
+RSI=100 - \frac{100}{1 + 2.05} \approx 67.2
+\end{align}
+$$</p>
+<p>这意味着 RSI 处于 67 附近，接近 70，可能进入超买区</p>
+<p>相比之下，第二种计算方式较为复杂， 但计算的RSI 的值更平滑，更加稳定</p>
+<p><strong>股票软件上的RSI指标解析</strong></p>
+<p>在没了解RSI指标之前，我是看不懂股票软件上的RSI指标的，比如日K线的RSI指标是<code>RSI(6,12,24) RSI1:41.279 RSI2: 49.594 RSI3: 52.606</code>这个是什么意思。在前面的学习案例里，我们使用的是14日为周期计算的。这里的<code>RSI(6,12,24)</code>其实就是多周期，代表了6，12，24三个不同的周期，后面的RSI1/RSI2/RSI3分别是对应周期的RSI值。</p>
+        </div>
+        
+    </div>
+
+
+
+                
+
+
+        </div>
+
+    </div>
+    <footer>
+        
+        <p>&copy; 2024 | 我的博客. 保留所有权利。</p>
+    <!--    <p><a href="/privacy">隐私政策</a> | <a href="/terms">使用条款</a></p>-->
+        
+    </footer>
+
+</body>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+ <!-- 在页面加载完成后启用代码高亮 -->
+    <script>
+        // 等待页面加载完成后执行高亮
+        document.addEventListener('DOMContentLoaded', function() {
+            // 启用 highlight.js 代码高亮
+            hljs.highlightAll();
+        });
+    </script>
+
+
+</html>

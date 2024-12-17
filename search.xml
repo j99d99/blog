@@ -1,5 +1,72 @@
 <?xml version='1.0' encoding='utf-8'?>
-<search><item><title>今天清仓了一只票</title><description>&lt;p&gt;都说炒股炒的是心态。最近突然有想记录一下自己股票操作和当时的心情，希望能够提升自己的复盘能力和一个稳定的心态吧，怎么说呢。有些情绪明明知道是不该的，但还是会经常出现。&lt;/p&gt;
+<search><item><title>K线技术分析指标学习记录-看懂RSI</title><description>&lt;p&gt;&lt;strong&gt;RSI指标解释&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;RSI（&lt;strong&gt;相对强弱指数&lt;/strong&gt;）是一个常用的技术分析指标，用来衡量一只股票在&lt;strong&gt;特定时间内涨跌的力度对比&lt;/strong&gt;，可帮助我们判断股票是否&lt;strong&gt;超买&lt;/strong&gt;或&lt;strong&gt;超卖&lt;/strong&gt;。通俗点说，就是它是告诉你当前市场是不是&lt;strong&gt;涨太多了（需要</description><html_content>&lt;p&gt;&lt;strong&gt;RSI指标解释&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;RSI（&lt;strong&gt;相对强弱指数&lt;/strong&gt;）是一个常用的技术分析指标，用来衡量一只股票在&lt;strong&gt;特定时间内涨跌的力度对比&lt;/strong&gt;，可帮助我们判断股票是否&lt;strong&gt;超买&lt;/strong&gt;或&lt;strong&gt;超卖&lt;/strong&gt;。通俗点说，就是它是告诉你当前市场是不是&lt;strong&gt;涨太多了（需要回调）&lt;/strong&gt; 或者 &lt;strong&gt;跌太多了（可能反弹）&lt;/strong&gt; 。这个指标简单直观，短线交易非常常用，特别是震荡行情当中。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;RSI的取值和计算方法&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;取值范围&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;RSI 的值在0 到 100之间：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;高于 70&lt;/strong&gt;：表示股票可能&lt;strong&gt;超买&lt;/strong&gt;，即价格涨得太猛了，可能会回调。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;低于 30&lt;/strong&gt;：表示股票可能&lt;strong&gt;超卖&lt;/strong&gt;，即价格跌得太狠了，可能会反弹。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;中间区域（30~70）&lt;/strong&gt;：一般没有明确的买卖信号，市场较为平稳。&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;RSI是怎么算的？&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第一种传统计算公式&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;A 表示n天上涨幅度之后，B表示n天下跌幅度之和&lt;/p&gt;
+&lt;p&gt;RSI（n)=A/（A+B)×100%&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;第二种计算公式&lt;/strong&gt;&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;计算一定周期内的涨幅和跌幅&lt;/strong&gt;（以14天的周期为例）：&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;RSI 计算最近 14 天的涨跌幅。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;把这 14 天内每天的涨幅加总得到 &lt;strong&gt;平均涨幅&lt;/strong&gt;。&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;同理，把 14 天内每天的跌幅加总得到 &lt;strong&gt;平均跌幅&lt;/strong&gt;。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;计算强弱比（RS）：&lt;/strong&gt;
+   $$
+   RS = \frac{\text{平均涨幅}}{\text{平均跌幅}}
+   $$&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;比如，最近 14 天平均涨幅是 2，平均跌幅是 1，RS = 2 / 1 = 2。&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;计算 RSI：&lt;/strong&gt;
+   $$
+   RSI = 100 - \frac{100}{1 + RS}
+   $$&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;如果 RS = 2
+   $$
+   RSI = 100 - \frac{100}{1 + 2} = 100 - 33.33 = 66.67
+   $$&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;简单的举个例子&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;假设某股票最近 14 天的收盘价涨跌如下(如果相比前一天是涨，就在涨幅这边加入，跌幅为0，同理，如果相比前一天是跌，在跌幅这边加入，涨幅为0)：&lt;/p&gt;
+&lt;p&gt;| 日期   | 涨幅 | 跌幅 |
+| ------ | ---- | ---- |
+| 第1天  | 2    | 0    |
+| 第2天  | 0    | 1    |
+| 第3天  | 3    | 0    |
+| 第4天  | 0    | 2    |
+| ...    | ...  | ...  |
+| 第14天 | 1    | 0    |&lt;/p&gt;
+&lt;p&gt;$$
+\begin{align}
+平均涨幅 = \frac{2 + 3 + 1}{14} = 0.43 
+\
+平均跌幅 = \frac{1 + 2}{14} = 0.21
+\
+RS=\frac{0.43}{0.21} = 2.05
+\
+RSI=100 - \frac{100}{1 + 2.05} \approx 67.2
+\end{align}
+$$&lt;/p&gt;
+&lt;p&gt;这意味着 RSI 处于 67 附近，接近 70，可能进入超买区&lt;/p&gt;
+&lt;p&gt;相比之下，第二种计算方式较为复杂， 但计算的RSI 的值更平滑，更加稳定&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;股票软件上的RSI指标解析&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;在没了解RSI指标之前，我是看不懂股票软件上的RSI指标的，比如日K线的RSI指标是&lt;code&gt;RSI(6,12,24) RSI1:41.279 RSI2: 49.594 RSI3: 52.606&lt;/code&gt;这个是什么意思。在前面的学习案例里，我们使用的是14日为周期计算的。这里的&lt;code&gt;RSI(6,12,24)&lt;/code&gt;其实就是多周期，代表了6，12，24三个不同的周期，后面的RSI1/RSI2/RSI3分别是对应周期的RSI值。&lt;/p&gt;</html_content></item><item><title>今天清仓了一只票</title><description>&lt;p&gt;都说炒股炒的是心态。最近突然有想记录一下自己股票操作和当时的心情，希望能够提升自己的复盘能力和一个稳定的心态吧，怎么说呢。有些情绪明明知道是不该的，但还是会经常出现。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;昨日减仓&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;怎么说呢，可能是人内心的贪婪或者执念吧。其实从整体的去看明明是一个很好的成绩了可偏偏还是有那种亏钱了的感觉，或许是心里的小想法在作祟吧。最近有一只票走势挺</description><html_content>&lt;p&gt;都说炒股炒的是心态。最近突然有想记录一下自己股票操作和当时的心情，希望能够提升自己的复盘能力和一个稳定的心态吧，怎么说呢。有些情绪明明知道是不该的，但还是会经常出现。&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;昨日减仓&lt;/strong&gt;&lt;/p&gt;

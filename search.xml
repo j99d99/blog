@@ -44,14 +44,47 @@
    $$&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;简单的举个例子&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;假设某股票最近 14 天的收盘价涨跌如下(如果相比前一天是涨，就在涨幅这边加入，跌幅为0，同理，如果相比前一天是跌，在跌幅这边加入，涨幅为0)：&lt;/p&gt;
-&lt;p&gt;| 日期   | 涨幅 | 跌幅 |
-| ------ | ---- | ---- |
-| 第1天  | 2    | 0    |
-| 第2天  | 0    | 1    |
-| 第3天  | 3    | 0    |
-| 第4天  | 0    | 2    |
-| ...    | ...  | ...  |
-| 第14天 | 1    | 0    |&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;日期&lt;/th&gt;
+&lt;th&gt;涨幅&lt;/th&gt;
+&lt;th&gt;跌幅&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;第1天&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;第2天&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;第3天&lt;/td&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;第4天&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;...&lt;/td&gt;
+&lt;td&gt;...&lt;/td&gt;
+&lt;td&gt;...&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;第14天&lt;/td&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;0&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 &lt;p&gt;$$
 \begin{align}
 平均涨幅 = \frac{2 + 3 + 1}{14} = 0.43 

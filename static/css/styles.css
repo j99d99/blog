@@ -703,7 +703,7 @@ pre code {
 }
 
 .nav-logo {
-  width: auto; /* 保持宽高比 */
+  width: 24px; /* 保持宽高比 */
   height: 24px; /* 根据需要调整logo的高度 */
   margin-right: 8px; /* logo和文本之间的间距 */
 }
